@@ -1,167 +1,113 @@
 [
   {
-    "id": "1",
-    "name": "Иван Петров",
+    "id": "b101",
+    "name": "TechBro",
     "platform": "YouTube",
     "category": "техника",
-    "subscribers": 125000,
+    "subscribers": 210000,
+    "avatar": "images/avatars/placeholder.png",
+
     "er": 4.5,
-    "price": 2500,
-    "email": "ivan@example.com",
-    "avatar": "../images/avatars/placeholder.png"
+    "avg_views": 18000,
+    "pricing": { "integrated": 1200, "currency": "USD" },
+
+    "language": "ru",
+    "country": "RU",
+    "audience_geo": "RU",
+    "audience_geo_share": 70,
+    "audience_gender": "male",
+    "audience_gender_share": 65,
+    "audience_age_bucket": "25-34",
+    "audience_age_share": 40,
+
+    "email": "contact@techbro.example",
+    "tags": ["tech", "gadgets", "reviews", "vpn"],
+    "ai_similar_to": ["Wylsacom", "Rozetked"],
+
+    "media_kit_url": "files/mediakits/techbro.pdf",
+    "youtube": "https://youtube.com/@techbro",
+
+    "metrics_history": [
+      { "date": "2025-03", "followers": 195000, "avg_views": 16000, "er": 4.4 },
+      { "date": "2025-04", "followers": 198000, "avg_views": 16500, "er": 4.5 },
+      { "date": "2025-05", "followers": 203000, "avg_views": 17000, "er": 4.5 },
+      { "date": "2025-06", "followers": 206000, "avg_views": 17500, "er": 4.6 },
+      { "date": "2025-07", "followers": 208000, "avg_views": 17800, "er": 4.5 },
+      { "date": "2025-08", "followers": 210000, "avg_views": 18000, "er": 4.5 }
+    ]
   },
   {
-    "id": "2", 
-    "name": "Анна Сидорова",
-    "platform": "Instagram",
-    "category": "красота", 
-    "subscribers": 87000,
+    "id": "b102",
+    "name": "BeautyDaily",
+    "platform": "TikTok",
+    "category": "красота",
+    "subscribers": 580000,
+    "avatar": "images/avatars/placeholder.png",
+
     "er": 7.2,
-    "price": 1800,
-    "email": "anna@example.com",
-    "avatar": "../images/avatars/placeholder.png"
+    "avg_views": 30000,
+    "pricing": { "integrated": 850, "currency": "USD" },
+
+    "language": "ru",
+    "country": "RU",
+    "audience_geo": "RU",
+    "audience_geo_share": 80,
+    "audience_gender": "female",
+    "audience_gender_share": 75,
+    "audience_age_bucket": "18-24",
+    "audience_age_share": 45,
+
+    "email": null,
+    "tags": ["beauty", "makeup", "skincare"],
+    "ai_similar_to": ["Huda Beauty", "Anastasia Beverly Hills"],
+
+    "media_kit_url": "files/mediakits/beautydaily.pdf",
+    "tiktok": "https://tiktok.com/@beautydaily",
+
+    "metrics_history": [
+      { "date": "2025-03", "followers": 540000, "avg_views": 27000, "er": 7.1 },
+      { "date": "2025-04", "followers": 552000, "avg_views": 28200, "er": 7.2 },
+      { "date": "2025-05", "followers": 563000, "avg_views": 29000, "er": 7.3 },
+      { "date": "2025-06", "followers": 570000, "avg_views": 29500, "er": 7.2 },
+      { "date": "2025-07", "followers": 576000, "avg_views": 29800, "er": 7.2 },
+      { "date": "2025-08", "followers": 580000, "avg_views": 30000, "er": 7.2 }
+    ]
   },
   {
-    "id": "3",
-    "name": "Сергей Козлов", 
+    "id": "b103",
+    "name": "GameRoom",
     "platform": "YouTube",
     "category": "игры",
-    "subscribers": 356000,
+    "subscribers": 350000,
+    "avatar": "images/avatars/placeholder.png",
+
     "er": 3.8,
-    "price": 4200,
-    "email": "sergey@example.com",
-    "avatar": "../images/avatars/placeholder.png"
-  },
-  {
-    "id": "4",
-    "name": "Мария Иванова",
-    "platform": "TikTok",
-    "category": "мода",
-    "subscribers": 210000,
-    "er": 8.1,
-    "price": 1900,
-    "email": "maria@example.com",
-    "avatar": "../images/avatars/placeholder.png"
-  },
-  {
-    "id": "5",
-    "name": "Дмитрий Смирнов",
-    "platform": "Telegram",
-    "category": "новости",
-    "subscribers": 45000,
-    "er": 5.5,
-    "price": 1200,
-    "email": "dmitry@example.com",
-    "avatar": "../images/avatars/placeholder.png"
-  },
-  {
-    "id": "6",
-    "name": "Ольга Кузнецова",
-    "platform": "YouTube",
-    "category": "кулинария",
-    "subscribers": 98000,
-    "er": 6.2,
-    "price": 1600,
-    "email": "olga@example.com",
-    "avatar": "../images/avatars/placeholder.png"
-  },
-  {
-    "id": "7",
-    "name": "Алексей Попов",
-    "platform": "TikTok",
-    "category": "юмор",
-    "subscribers": 320000,
-    "er": 5.8,
-    "price": 2800,
-    "email": "alex@example.com",
-    "avatar": "../images/avatars/placeholder.png"
-  },
-  {
-    "id": "8",
-    "name": "Елена Васнецова",
-    "platform": "Instagram",
-    "category": "здоровье",
-    "subscribers": 145000,
-    "er": 6.9,
-    "price": 2200,
-    "email": "elena@example.com",
-    "avatar": "../images/avatars/placeholder.png"
-  },
-  {
-    "id": "9",
-    "name": "Михаил Орлов",
-    "platform": "YouTube",
-    "category": "авто",
-    "subscribers": 189000,
-    "er": 4.2,
-    "price": 2100,
-    "email": "mikhail@example.com",
-    "avatar": "../images/avatars/placeholder.png"
-  },
-  {
-    "id": "10",
-    "name": "Светлана Котова",
-    "platform": "Instagram",
-    "category": "путешествия",
-    "subscribers": 112000,
-    "er": 7.8,
-    "price": 1950,
-    "email": "svetlana@example.com",
-    "avatar": "../images/avatars/placeholder.png"
-  },
-  {
-    "id": "11",
-    "name": "Артем Белов",
-    "platform": "Telegram",
-    "category": "крипто",
-    "subscribers": 68000,
-    "er": 8.5,
-    "price": 3200,
-    "email": "artem@example.com",
-    "avatar": "../images/avatars/placeholder.png"
-  },
-  {
-    "id": "12",
-    "name": "Наталья Зверева",
-    "platform": "YouTube",
-    "category": "образование",
-    "subscribers": 76000,
-    "er": 6.1,
-    "price": 1450,
-    "email": "natalia@example.com",
-    "avatar": "../images/avatars/placeholder.png"
-  },
-  {
-    "id": "13",
-    "name": "Павел Громов",
-    "platform": "TikTok",
-    "category": "спорт",
-    "subscribers": 430000,
-    "er": 3.9,
-    "price": 3800,
-    "email": "pavel@example.com",
-    "avatar": "../images/avatars/placeholder.png"
-  },
-  {
-    "id": "14",
-    "name": "Ирина Морозова",
-    "platform": "Instagram",
-    "category": "мода",
-    "subscribers": 92000,
-    "er": 7.4,
-    "price": 1750,
-    "email": "irina@example.com",
-    "avatar": "../images/avatars/placeholder.png"
-  },
-  {
-    "id": "15",
-    "name": "Денис Соколов",
-    "platform": "YouTube",
-    "category": "техника",
-    "subscribers": 275000,
-    "er": 4.8,
-    "price": 2950,
-    "email": "denis@example.com",
-    "avatar": "../images/avatars/placeholder.png"
+    "avg_views": 22000,
+    "pricing": { "integrated": 950, "currency": "USD" },
+
+    "language": "ru",
+    "country": "RU",
+    "audience_geo": "RU",
+    "audience_geo_share": 60,
+    "audience_gender": "male",
+    "audience_gender_share": 70,
+    "audience_age_bucket": "18-24",
+    "audience_age_share": 35,
+
+    "email": "biz@gameroom.example",
+    "tags": ["gaming", "streams", "reviews"],
+    "ai_similar_to": ["PewDiePie", "TheRadBrad"],
+
+    "media_kit_url": "files/mediakits/gameroom.pdf",
+    "youtube": "https://youtube.com/@gameroom",
+
+    "metrics_history": [
+      { "date": "2025-03", "followers": 330000, "avg_views": 20000, "er": 3.7 },
+      { "date": "2025-04", "followers": 335000, "avg_views": 20500, "er": 3.7 },
+      { "date": "2025-05", "followers": 340000, "avg_views": 21200, "er": 3.8 },
+      { "date": "2025-06", "followers": 344000, "avg_views": 21600, "er": 3.8 },
+      { "date": "2025-07", "followers": 347000, "avg_views": 21800, "er": 3.8 },
+      { "date": "2025-08", "followers": 350000, "avg_views": 22000, "er": 3.8 }
+    ]
   }
 ]

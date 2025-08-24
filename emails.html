@@ -33,6 +33,24 @@
   </style>
 </head>
 <body>
+<style>
+  /* EMERGENCY FIX FOR HEADER */
+  body {
+    padding-top: 84px !important;
+  }
+  
+  main.container,
+  .deal-main {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+  
+  @media (max-width: 640px) {
+    body {
+      padding-top: 76px !important;
+    }
+  }
+</style>
   <div data-include="/components/header.html"></div>
   <div data-include="/components/nav.html"></div>
 

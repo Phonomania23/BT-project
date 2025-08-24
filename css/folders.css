@@ -1,0 +1,227 @@
+/* css/folders.css - Стили для системы папок и избранного */
+.folders-sidebar {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 20px;
+    border: 1px solid var(--surface-border);
+    margin-bottom: 20px;
+}
+
+.folders-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.folders-header h3 {
+    margin: 0;
+    color: var(--text-on-surface);
+    font-size: 1.1em;
+}
+
+.folders-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.folder-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.folder-item:hover {
+    background: var(--surface-2);
+}
+
+.folder-item.has-items {
+    font-weight: 500;
+}
+
+.folder-icon {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.folder-name {
+    flex: 1;
+    color: var(--text-on-surface);
+    font-size: 0.95em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.folder-count {
+    background: var(--surface-border);
+    color: var(--text-on-surface);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    margin: 0 10px;
+}
+
+.folder-actions {
+    display: none;
+    gap: 5px;
+}
+
+.folder-item:hover .folder-actions {
+    display: flex;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background 0.2s ease;
+}
+
+.btn-icon:hover {
+    background: var(--surface-border);
+}
+
+/* Стили для действий с блогерами */
+.blogger-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.toggle-favorite.favorited {
+    color: #ffc107;
+}
+
+.add-to-folder-menu {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-2);
+    min-width: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.menu-header {
+    padding: 12px;
+    border-bottom: 1px solid var(--surface-border);
+    font-weight: 600;
+    color: var(--text-on-surface);
+}
+
+.menu-items {
+    padding: 5px 0;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.menu-item:hover {
+    background: var(--surface-2);
+}
+
+.folder-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.already-added {
+    margin-left: auto;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.menu-footer {
+    padding: 10px;
+    border-top: 1px solid var(--surface-border);
+}
+
+/* Цветовая палитра */
+.color-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.color-option {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+}
+
+.color-option input {
+    position: absolute;
+    opacity: 0;
+}
+
+.color-option input:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .folders-sidebar {
+        margin: 10px 0;
+    }
+    
+    .folder-actions {
+        display: flex;
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        padding: 2px;
+    }
+}
+
+/* Анимации */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.toggle-favorite.favorited {
+    animation: pulse 0.3s ease;
+}
+
+/* Состояния пустоты */
+.empty-state {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+}
+
+.empty-state p {
+    margin: 5px 0;
+}

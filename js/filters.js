@@ -1,409 +1,361 @@
-// filters.js — единый файл для фильтрации и отображения блогеров
-(function() {
-    console.log("✅ filters.js loaded");
+// /js/filters.js — фильтрация + список блогеров на шаге «Подбор» через <blogger-card>
+(function () {
+  const LS_PICKED = "selectedBloggers";
 
-    const LS_PICKED = "selectedBloggers";
-    let allBloggers = [];
-    let selected = new Set();
-    let currentFilters = {};
+  let allBloggers = [];
+  const picked = new Set(readPicked().map(String));
+  const current = { ai: null };
 
-    // Утилиты
-    const $ = (sel) => document.querySelector(sel);
-    const $$ = (sel) => document.querySelectorAll(sel);
+  // ====== shorthands ======
+  const $  = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => root.querySelectorAll(sel);
 
-    function readPicked() {
-        try {
-            return JSON.parse(localStorage.getItem(LS_PICKED) || '[]');
-        } catch {
-            return [];
+  function readPicked(){ try{ return JSON.parse(localStorage.getItem(LS_PICKED)||"[]"); }catch{ return []; } }
+  function writePicked(arr){ try{ localStorage.setItem(LS_PICKED, JSON.stringify(arr)); }catch{} }
+
+  // ====== загрузка данных ======
+  async function loadBloggers() {
+    try{
+      const r = await fetch("../json/bloggers.json");
+      if (!r.ok) throw new Error(r.statusText);
+      allBloggers = await r.json();
+    }catch(e){
+      // fallback с полями под расширенные фильтры
+      allBloggers = [
+        {
+          id:"b101", name:"TechBro", platform:"YouTube", category:"техника",
+          subscribers:210000, er:4.5, avg_er:4.5, avg_views:18000,
+          pricing:{integrated:1200,currency:"USD"}, avatar:"/images/avatars/placeholder.png",
+          language:"ru", country:"RU", audience_geo:"RU", audience_geo_share:70,
+          audience_gender:"male", audience_gender_share:65,
+          audience_age_bucket:"25-34", audience_age_share:40,
+          email:"techbro@example.com", tags:["gadgets","reviews"], ai_similar_to:["Wylsacom"]
+        },
+        {
+          id:"b102", name:"BeautyDaily", platform:"TikTok", category:"красота",
+          subscribers:580000, er:7.2, avg_er:7.2, avg_views:30000,
+          pricing:{integrated:850,currency:"USD"}, avatar:"/images/avatars/placeholder.png",
+          language:"ru", country:"RU", audience_geo:"RU", audience_geo_share:80,
+          audience_gender:"female", audience_gender_share:75,
+          audience_age_bucket:"18-24", audience_age_share:45,
+          email:null, tags:["makeup","skincare"], ai_similar_to:["Huda Beauty"]
+        },
+        {
+          id:"b103", name:"GameRoom", platform:"YouTube", category:"игры",
+          subscribers:350000, er:3.8, avg_er:3.8, avg_views:22000,
+          pricing:{integrated:950,currency:"USD"}, avatar:"/images/avatars/placeholder.png",
+          language:"ru", country:"RU", audience_geo:"RU", audience_geo_share:60,
+          audience_gender:"male", audience_gender_share:70,
+          audience_age_bucket:"18-24", audience_age_share:35,
+          email:"games@example.com", tags:["gaming","streams"], ai_similar_to:["PewDiePie"]
         }
+      ];
+      console.warn("bloggers.json не найден — используем fallback", e);
     }
+  }
 
-    function writePicked(ids) {
-        localStorage.setItem(LS_PICKED, JSON.stringify(ids));
-    }
+  // ====== публичный инициализатор для роутера ======
+  window.initPickStep = async function(){
+    await loadBloggers();
+    bindUI();
+    applyFilters();
+    document.dispatchEvent(new CustomEvent("filters:ready"));
+  };
 
-    // Загрузка данных
-    async function loadBloggers() {
-        try {
-            console.log("🔄 Загрузка bloggers.json...");
-            const response = await fetch('../json/bloggers.json');
-            
-            if (response.ok) {
-                allBloggers = await response.json();
-                console.log(`✅ Загружено ${allBloggers.length} блогеров`);
-                return allBloggers;
-            }
-            
-            throw new Error('Не удалось загрузить bloggers.json');
-            
-        } catch (e) {
-            console.error('Ошибка загрузки:', e);
-            // Fallback данные
-            allBloggers = [
-                {
-                    id: "1",
-                    name: "Иван Петров",
-                    platform: "YouTube",
-                    category: "техника",
-                    subscribers: 125000,
-                    er: 4.5,
-                    price: 2500,
-                    email: "ivan@example.com",
-                    avatar: "../images/avatars/placeholder.png"
-                },
-                {
-                    id: "2", 
-                    name: "Анна Сидорова",
-                    platform: "Instagram",
-                    category: "красота", 
-                    subscribers: 87000,
-                    er: 7.2,
-                    price: 1800,
-                    email: "anna@example.com",
-                    avatar: "../images/avatars/placeholder.png"
-                },
-                {
-                    id: "3",
-                    name: "Сергей Козлов", 
-                    platform: "YouTube",
-                    category: "игры",
-                    subscribers: 356000,
-                    er: 3.8,
-                    price: 4200,
-                    email: "sergey@example.com",
-                    avatar: "../images/avatars/placeholder.png"
-                },
-                {
-                    id: "4",
-                    name: "Мария Иванова",
-                    platform: "TikTok",
-                    category: "мода",
-                    subscribers: 210000,
-                    er: 8.1,
-                    price: 1900,
-                    email: "maria@example.com",
-                    avatar: "../images/avatars/placeholder.png"
-                },
-                {
-                    id: "5",
-                    name: "Дмитрий Смирнов",
-                    platform: "Telegram",
-                    category: "новости",
-                    subscribers: 45000,
-                    er: 5.5,
-                    price: 1200,
-                    email: "dmitry@example.com",
-                    avatar: "../images/avatars/placeholder.png"
-                },
-                {
-                    id: "6",
-                    name: "Ольга Кузнецова",
-                    platform: "YouTube",
-                    category: "кулинария",
-                    subscribers: 98000,
-                    er: 6.2,
-                    price: 1600,
-                    email: "olga@example.com",
-                    avatar: "../images/avatars/placeholder.png"
-                }
-            ];
-            console.log("🔄 Используем fallback данные");
-            return allBloggers;
-        }
-    }
+  // ====== биндинги ======
+  function bindUI(){
+    // AI-поиск
+    $("#aiApply")?.addEventListener("click", applyAIFilter);
+    $("#aiClear")?.addEventListener("click", ()=>{
+      const i = $("#aiQuery"); if (i) i.value = "";
+      current.ai = null; applyFilters();
+    });
 
-    // Основная функция инициализации
-    window.initPickStep = async function() {
-        console.log("🚀 Инициализация шага подбора");
-        
-        await loadBloggers();
-        
-        // Восстанавливаем выбранное
-        try {
-            const saved = readPicked();
-            selected = new Set(saved.map(String));
-            console.log(`📊 Восстановлено ${selected.size} выбранных блогеров`);
-        } catch (e) {
-            console.warn('Ошибка восстановления выбора:', e);
-        }
+    // включение полей после выбора платформы
+    $("#fPlatform")?.addEventListener("change", () => {
+      enableFilters(!!$("#fPlatform")?.value);
+      applyFilters();
+    });
 
-        initFilterListeners();
-        applyFilters();
-        
-        console.log("✅ Шаг 1 готов");
-        document.dispatchEvent(new CustomEvent('filters:ready'));
+    // обычные фильтры
+    const ids = [
+      "followersMinK","followersMaxK","fCategory","fQuery",
+      "fGeo","fGeoShare","fGender","fAgeBucket","fAgeShare",
+      "fErMin","fErMax","fViewsMin",
+      "fPriceMin","fPriceMax","fLang","fCountry","fHasEmail",
+      "fSimilarTo","fTopER","fSortBy","fSortDir"
+    ];
+    ids.forEach(id=>{
+      const el = document.getElementById(id);
+      if (!el) return;
+      const evt = el.tagName === "SELECT" || el.type==="checkbox" ? "change" : "input";
+      el.addEventListener(evt, applyFilters);
+    });
+
+    // действия
+    $("#selectAll")?.addEventListener("click", ()=>{
+      const host = $("#resultsList");
+      // ожидаем, что в <blogger-card> есть чекбокс .bc-pick в light DOM
+      host?.querySelectorAll("blogger-card .bc-pick").forEach(cb=>{
+        if (!cb.checked){ cb.checked = true; cb.dispatchEvent(new Event("change")); }
+      });
+    });
+    $("#clearPicked")?.addEventListener("click", ()=>{
+      picked.clear(); writePicked([]);
+      updateCounters();
+      $("#resultsList")?.querySelectorAll("blogger-card .bc-pick").forEach(cb=> cb.checked=false);
+    });
+
+    $("#clearFilters")?.addEventListener("click", ()=>{
+      $$("#filtersForm input, #filtersForm select").forEach(el=>{
+        if (el.type==="checkbox") el.checked=false; else el.value="";
+      });
+      current.ai = null;
+      enableFilters(false);
+      applyFilters();
+    });
+
+    // реакция на выбор карточек (эмиитируется <blogger-card>)
+    $("#resultsList")?.addEventListener("pick:change", (e)=>{
+      const {id, picked: on} = e.detail || {};
+      if (!id) return;
+      on ? picked.add(String(id)) : picked.delete(String(id));
+      writePicked([...picked]);
+      updateCounters();
+    });
+
+    // дадим компонентам доступ к Set
+    const host = $("#resultsList");
+    if (host) { host.dataset.pickedSet = "1"; host._pickedSet = picked; }
+
+    // при первом входе блокируем расширенные фильтры до платформы
+    enableFilters(!!$("#fPlatform")?.value);
+  }
+
+  function enableFilters(enable){
+    const toEnable = $$("#fCategory, #fGeo, #fGeoShare, #fGender, #fAgeBucket, #fAgeShare, #fErMin, #fErMax, #fViewsMin, #fPriceMin, #fPriceMax, #fLang, #fCountry, #fHasEmail, #fSimilarTo, #fTopER, #fSortBy, #fSortDir");
+    toEnable.forEach(el => el.disabled = !enable);
+  }
+
+  function applyAIFilter(){
+    const q = ($("#aiQuery")?.value||"").toLowerCase().trim();
+    current.ai = q || null;
+    applyFilters();
+  }
+
+  // ====== фильтрация ======
+  function applyFilters(){
+    let list = allBloggers.slice();
+
+    const platform  = $("#fPlatform")?.value || "";
+    const cat       = $("#fCategory")?.value || "";
+    const q         = ($("#fQuery")?.value || "").toLowerCase();
+
+    const minK      = +($("#followersMinK")?.value || 0);
+    const maxK      = +($("#followersMaxK")?.value || 0);
+
+    const geo       = $("#fGeo")?.value || "";
+    const geoShare  = +($("#fGeoShare")?.value || 0);
+
+    const gender    = $("#fGender")?.value || "";             // male/female
+    const ageBucket = $("#fAgeBucket")?.value || "";          // "18-24" и т.д.
+    const ageShare  = +($("#fAgeShare")?.value || 0);
+
+    const erMin     = parseFloat($("#fErMin")?.value || "");
+    const erMax     = parseFloat($("#fErMax")?.value || "");
+    const viewsMin  = parseFloat($("#fViewsMin")?.value || "");
+
+    const pMin      = parseFloat($("#fPriceMin")?.value || "");
+    const pMax      = parseFloat($("#fPriceMax")?.value || "");
+
+    const lang      = $("#fLang")?.value || "";               // "ru"/"en"
+    const country   = $("#fCountry")?.value || "";            // "RU"
+    const hasEmail  = !!$("#fHasEmail")?.checked;
+
+    const similarTo = ($("#fSimilarTo")?.value || "").toLowerCase().trim();
+    const topER     = !!$("#fTopER")?.checked;
+
+    const sortBy    = $("#fSortBy")?.value || "followers";
+    const sortDir   = $("#fSortDir")?.value || "desc";
+
+    // helpers
+    const ER   = b => (b.avg_er ?? b.er ?? b.engagement_rate ?? 0);
+    const VIEWS= b => (b.avg_views ?? b.views ?? b.avg_views_per_post ?? 0);
+    const SUBS = b => (+b.subscribers||+b.followers||+b.follower_count||0);
+    const USD  = b => {
+      const p = b?.pricing?.integrated ?? b?.price ?? b?.integrated_usd;
+      if (p==null) return NaN;
+      const cur = (b?.pricing?.currency || b?.currency || "USD").toUpperCase();
+      const FX = { USD:1, RUB:0.012, EUR:1.07 };
+      return Math.round(+p * (FX[cur] ?? 1));
     };
 
-    function initFilterListeners() {
-        console.log("🔄 Инициализация обработчиков фильтров");
+    if (platform) list = list.filter(b => (b.platform||"") === platform);
 
-        // Основные фильтры
-        const filterInputs = ['fPlatform', 'followersMinK', 'followersMaxK', 'fCategory', 'fQuery'];
-        
-        filterInputs.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                element.addEventListener('input', applyFilters);
-                element.addEventListener('change', applyFilters);
-            }
-        });
+    // базовые
+    if (cat) list = list.filter(b => (b.category||"").toLowerCase().includes(cat.toLowerCase()));
+    if (q)   list = list.filter(b => {
+      const hay = [
+        (b.name||""),(b.category||""),(b.platform||""),(Array.isArray(b.tags)? b.tags.join(" "):"")
+      ].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
 
-        // Кнопки управления
-        $('#selectAll')?.addEventListener('click', selectAllFiltered);
-        $('#clearPicked')?.addEventListener('click', clearSelected);
-        $('#clearFilters')?.addEventListener('click', clearAllFilters);
+    if (minK) list = list.filter(b => SUBS(b) >= minK*1000);
+    if (maxK) list = list.filter(b => SUBS(b) <= maxK*1000);
+
+    // демография/гео
+    if (geo) {
+      list = list.filter(b => {
+        const g = (b.audience_geo || b.geo || b.country || "").toString().toUpperCase();
+        if (!g) return false;
+        if (geoShare>0) {
+          const share = Number(b.audience_geo_share ?? b.geo_share ?? 0);
+          return g.includes(geo.toUpperCase()) && share >= geoShare;
+        }
+        return g.includes(geo.toUpperCase());
+      });
+    }
+    if (gender) {
+      list = list.filter(b => {
+        const g = (b.audience_gender || "").toLowerCase();
+        const share = Number(b.audience_gender_share ?? 0);
+        return g === gender && (share >= 60 || share >= ($("#fGender") ? 60 : 0)); // по умолч. 60%
+      });
+    }
+    if (ageBucket) {
+      list = list.filter(b => {
+        const bkt = (b.audience_age_bucket || "").toString();
+        const share = Number(b.audience_age_share ?? 0);
+        return bkt === ageBucket && (ageShare ? share >= ageShare : true);
+      });
     }
 
-    function applyFilters() {
-        let filtered = [...allBloggers];
-        
-        // Получаем значения фильтров
-        const platform = $('#fPlatform')?.value || '';
-        const minFollowers = $('#followersMinK')?.value || '';
-        const maxFollowers = $('#followersMaxK')?.value || '';
-        const category = $('#fCategory')?.value || '';
-        const query = $('#fQuery')?.value || '';
+    // метрики
+    if (!Number.isNaN(erMin)) list = list.filter(b => ER(b)   >= erMin);
+    if (!Number.isNaN(erMax)) list = list.filter(b => ER(b)   <= erMax);
+    if (!Number.isNaN(viewsMin)) list = list.filter(b => VIEWS(b) >= viewsMin);
 
-        // Фильтр по платформе
-        if (platform) {
-            filtered = filtered.filter(b => b.platform === platform);
-        }
+    // цена
+    if (!Number.isNaN(pMin)) list = list.filter(b => Number.isNaN(USD(b)) || USD(b) >= pMin);
+    if (!Number.isNaN(pMax)) list = list.filter(b => Number.isNaN(USD(b)) || USD(b) <= pMax);
 
-        // Фильтр по подписчикам
-        if (minFollowers) {
-            const min = parseInt(minFollowers) * 1000;
-            filtered = filtered.filter(b => b.subscribers >= min);
-        }
-        
-        if (maxFollowers) {
-            const max = parseInt(maxFollowers) * 1000;
-            filtered = filtered.filter(b => b.subscribers <= max);
-        }
+    // язык/страна автора
+    if (lang)    list = list.filter(b => (b.language||"").toLowerCase() === lang.toLowerCase());
+    if (country) list = list.filter(b => (b.country||"").toUpperCase()   === country.toUpperCase());
 
-        // Фильтр по категории
-        if (category) {
-            const categoryLower = category.toLowerCase();
-            filtered = filtered.filter(b => 
-                b.category && b.category.toLowerCase().includes(categoryLower)
-            );
-        }
+    // контакты
+    if (hasEmail) list = list.filter(b => !!b.email);
 
-        // Поисковый запрос
-        if (query) {
-            const queryLower = query.toLowerCase();
-            filtered = filtered.filter(b => 
-                b.name.toLowerCase().includes(queryLower) ||
-                (b.category && b.category.toLowerCase().includes(queryLower)) ||
-                b.platform.toLowerCase().includes(queryLower)
-            );
-        }
-
-        renderResults(filtered);
-        updateChips();
+    // AI
+    if (similarTo) {
+      list = list.filter(b => {
+        const arr = (b.ai_similar_to || []);
+        const tags= (b.tags || []);
+        const hay = [arr.join(" "), tags.join(" "), b.name||"", b.category||""].join(" ").toLowerCase();
+        return hay.includes(similarTo);
+      });
+    }
+    if (current.ai){
+      const words = current.ai.split(/\s+/).filter(Boolean);
+      list = list.filter(b => {
+        const hay = [
+          (b.name||""),(b.category||""),(b.platform||""),(b.language||""),(b.country||""),
+          (b.tags||[]).join(" "), (b.ai_similar_to||[]).join(" ")
+        ].join(" ").toLowerCase();
+        return words.every(w => hay.includes(w));
+      });
     }
 
-    function renderResults(bloggers) {
-        const resultsList = $('#resultsList');
-        if (!resultsList) return;
-        
-        if (bloggers.length === 0) {
-            resultsList.innerHTML = '<li class="muted">Ничего не найдено. Попробуйте изменить фильтры.</li>';
-            
-            // Обновляем счетчики
-            if ($('#resultsCount')) $('#resultsCount').textContent = '0';
-            if ($('#pickedCount')) $('#pickedCount').textContent = selected.size;
-            
-            return;
-        }
-        
-        resultsList.innerHTML = bloggers.map(blogger => `
-            <li class="card-blogger" data-id="${blogger.id}">
-                <div class="avatar">${blogger.name.charAt(0)}</div>
-                <div>
-                    <div class="name"><strong>${blogger.name}</strong></div>
-                    <div class="meta">
-                        <span class="badge">${blogger.platform || '—'}</span>
-                        <span class="badge">${blogger.category || '—'}</span>
-                    </div>
-                    <div class="meta">
-                        Подписчики: ${(blogger.subscribers / 1000).toFixed(0)}K · 
-                        ER: ${blogger.er || 'N/A'}% · 
-                        Цена: ${blogger.price || '—'}$
-                    </div>
-                    <div class="actions">
-                        <label class="select-radio">
-                            <input type="checkbox" class="pick" 
-                                   data-id="${blogger.id}" 
-                                   ${selected.has(String(blogger.id)) ? 'checked' : ''}>
-                            В выборку
-                        </label>
-                    </div>
-                </div>
-            </li>
-        `).join('');
-
-        // Обновляем счетчики
-        if ($('#resultsCount')) $('#resultsCount').textContent = bloggers.length;
-        if ($('#pickedCount')) $('#pickedCount').textContent = selected.size;
-
-        // Вешаем обработчики на чекбоксы
-        resultsList.querySelectorAll('.pick').forEach(checkbox => {
-            checkbox.addEventListener('change', handleSelection);
-        });
+    // топ по ER (25%)
+    if (topER && list.length>3) {
+      const sorted = list.slice().sort((a,b)=> ER(b)-ER(a));
+      const cutoff = Math.ceil(sorted.length*0.25);
+      const thr = ER(sorted[cutoff-1]);
+      list = list.filter(b => ER(b) >= thr);
     }
 
-    function handleSelection(e) {
-        const id = e.target.dataset.id;
-        const card = e.target.closest('.card-blogger');
-        
-        if (e.target.checked) {
-            selected.add(id);
-            card.classList.add('selected');
-        } else {
-            selected.delete(id);
-            card.classList.remove('selected');
-        }
-        
-        writePicked([...selected]);
-        if ($('#pickedCount')) $('#pickedCount').textContent = selected.size;
-    }
-
-    function selectAllFiltered() {
-        const visibleCards = $('#resultsList').querySelectorAll('.card-blogger');
-        const visibleIds = Array.from(visibleCards).map(card => card.dataset.id);
-        
-        visibleIds.forEach(id => {
-            if (!selected.has(id)) {
-                selected.add(id);
-            }
-        });
-        
-        writePicked([...selected]);
-        
-        // Обновляем UI
-        visibleCards.forEach(card => {
-            card.classList.add('selected');
-            const checkbox = card.querySelector('.pick');
-            if (checkbox) checkbox.checked = true;
-        });
-        
-        if ($('#pickedCount')) $('#pickedCount').textContent = selected.size;
-    }
-
-    function clearSelected() {
-        // Снимаем выделение со всех карточек
-        $('#resultsList').querySelectorAll('.card-blogger').forEach(card => {
-            card.classList.remove('selected');
-            const checkbox = card.querySelector('.pick');
-            if (checkbox) checkbox.checked = false;
-        });
-        
-        selected.clear();
-        writePicked([]);
-        if ($('#pickedCount')) $('#pickedCount').textContent = '0';
-    }
-
-    function clearAllFilters() {
-        // Сброс всех полей
-        const fieldsToClear = ['fPlatform', 'followersMinK', 'followersMaxK', 'fCategory', 'fQuery'];
-        
-        fieldsToClear.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) element.value = '';
-        });
-        
-        currentFilters = {};
-        applyFilters();
-    }
-
-    function updateChips() {
-        const chips = $('#activeChips');
-        if (!chips) return;
-        
-        const activeFilters = [];
-        const platform = $('#fPlatform')?.value;
-        const minFollowers = $('#followersMinK')?.value;
-        const maxFollowers = $('#followersMaxK')?.value;
-        const category = $('#fCategory')?.value;
-        const query = $('#fQuery')?.value;
-
-        if (platform) {
-            activeFilters.push(`Платформа: ${platform}`);
-        }
-        
-        if (minFollowers) {
-            activeFilters.push(`Подписчики от: ${minFollowers}K`);
-        }
-        
-        if (maxFollowers) {
-            activeFilters.push(`Подписчики до: ${maxFollowers}K`);
-        }
-        
-        if (category) {
-            activeFilters.push(`Категория: ${category}`);
-        }
-        
-        if (query) {
-            activeFilters.push(`Поиск: ${query}`);
-        }
-
-        chips.innerHTML = activeFilters.map(filter => 
-            `<span class="chip-filter">${filter}<button type="button">×</button></span>`
-        ).join('') || '<span class="muted">Нет активных фильтров</span>';
-
-        // Добавляем обработчики для кнопок удаления чипов
-        chips.querySelectorAll('.chip-filter button').forEach((button, index) => {
-            button.addEventListener('click', function() {
-                const filterType = activeFilters[index].split(':')[0].trim();
-                
-                switch(filterType) {
-                    case 'Платформа':
-                        $('#fPlatform').value = '';
-                        break;
-                    case 'Подписчики от':
-                        $('#followersMinK').value = '';
-                        break;
-                    case 'Подписчики до':
-                        $('#followersMaxK').value = '';
-                        break;
-                    case 'Категория':
-                        $('#fCategory').value = '';
-                        break;
-                    case 'Поиск':
-                        $('#fQuery').value = '';
-                        break;
-                }
-                
-                applyFilters();
-            });
-        });
-    }
-
-    // Глобальная функция для переключения выбора (для использования в других скриптах)
-    window.toggleBloggerSelection = function(bloggerId) {
-        const blogger = allBloggers.find(b => b.id === bloggerId);
-        if (!blogger) return;
-        
-        const id = String(bloggerId);
-        
-        if (selected.has(id)) {
-            selected.delete(id);
-        } else {
-            selected.add(id);
-        }
-        
-        writePicked([...selected]);
-        
-        // Обновляем UI
-        const card = $(`.card-blogger[data-id="${bloggerId}"]`);
-        if (card) {
-            card.classList.toggle('selected');
-            const checkbox = card.querySelector('.pick');
-            if (checkbox) checkbox.checked = selected.has(id);
-        }
-        
-        if ($('#pickedCount')) $('#pickedCount').textContent = selected.size;
+    // сортировка
+    const cmpMap = {
+      followers: (a,b)=> SUBS(b)-SUBS(a),
+      er:        (a,b)=> ER(b)-ER(a),
+      views:     (a,b)=> VIEWS(b)-VIEWS(a),
+      price:     (a,b)=> {
+        const au=USD(a), bu=USD(b);
+        if (Number.isNaN(au) && Number.isNaN(bu)) return 0;
+        if (Number.isNaN(au)) return 1;
+        if (Number.isNaN(bu)) return -1;
+        return bu-au;
+      }
     };
+    const cmp = cmpMap[sortBy] || cmpMap.followers;
+    list.sort(cmp);
+    if (sortDir==="asc") list.reverse();
 
+    renderResults(list);
+    updateChips();
+  }
+
+  // ====== рендер ======
+  function renderResults(list){
+    const host = $("#resultsList");
+    if (!host) return;
+    host.innerHTML = "";
+
+    if (!list.length){
+      host.innerHTML = `<li class="muted">Ничего не найдено. Уточните фильтры.</li>`;
+      updateCounters();
+      return;
+    }
+
+    list.forEach(b => {
+      const el = document.createElement("blogger-card");
+      el.data = b;                 // отдаём объект компоненту
+      el.setAttribute("selectable",""); // просим показать чекбокс
+      host.appendChild(el);
+    });
+
+    updateCounters(list.length);
+  }
+
+  function updateCounters(len){
+    const results = (len ?? $("#resultsList")?.querySelectorAll("blogger-card")?.length ?? 0);
+    if ($("#resultsCount")) $("#resultsCount").textContent = results;
+    if ($("#pickedCount"))  $("#pickedCount").textContent  = picked.size;
+  }
+
+  // ====== чипы ======
+  function updateChips(){
+    const chips = $("#activeChips");
+    if (!chips) return;
+    const A = [];
+    if ($("#fPlatform")?.value)  A.push(`Платформа: ${$("#fPlatform").value}`);
+    if ($("#fCategory")?.value)  A.push(`Категория: ${$("#fCategory").value}`);
+    if ($("#followersMinK")?.value) A.push(`Подписчики ≥ ${$("#followersMinK").value}k`);
+    if ($("#followersMaxK")?.value) A.push(`Подписчики ≤ ${$("#followersMaxK").value}k`);
+
+    if ($("#fGeo")?.value)       A.push(`Audience geo: ${$("#fGeo").value}${$("#fGeoShare")?.value?` ≥ ${$("#fGeoShare").value}%`:""}`);
+    if ($("#fGender")?.value)    A.push(`Audience gender: ${$("#fGender").value}`);
+    if ($("#fAgeBucket")?.value) A.push(`Age: ${$("#fAgeBucket").value}${$("#fAgeShare")?.value?` ≥ ${$("#fAgeShare").value}%`:""}`);
+
+    if ($("#fErMin")?.value)     A.push(`ER ≥ ${$("#fErMin").value}%`);
+    if ($("#fErMax")?.value)     A.push(`ER ≤ ${$("#fErMax").value}%`);
+    if ($("#fViewsMin")?.value)  A.push(`Views ≥ ${$("#fViewsMin").value}`);
+
+    if ($("#fPriceMin")?.value)  A.push(`Цена ≥ $${$("#fPriceMin").value}`);
+    if ($("#fPriceMax")?.value)  A.push(`Цена ≤ $${$("#fPriceMax").value}`);
+
+    if ($("#fLang")?.value)      A.push(`Язык: ${$("#fLang").value}`);
+    if ($("#fCountry")?.value)   A.push(`Страна: ${$("#fCountry").value}`);
+    if ($("#fHasEmail")?.checked)A.push(`Только с email`);
+
+    if ($("#fSimilarTo")?.value) A.push(`Lookalikes: ${$("#fSimilarTo").value}`);
+    if ($("#fTopER")?.checked)   A.push(`Top 25% ER`);
+
+    if ($("#fSortBy")?.value)    A.push(`Сорт: ${$("#fSortBy").value} ${$("#fSortDir")?.value==="asc"?"↑":"↓"}`);
+    if (current.ai)              A.push(`AI: ${current.ai}`);
+    if ($("#fQuery")?.value)     A.push(`Поиск: ${$("#fQuery").value}`);
+
+    chips.innerHTML = A.length ? A.map(x=>`<span class="tag">${x}</span>`).join("") : `<span class="muted">Нет активных фильтров</span>`;
+  }
 })();

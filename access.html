@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Доступ — Bloggers.tools</title>
+  <link rel="stylesheet" href="css/base.css"/>
+  <link rel="stylesheet" href="css/layout.css"/>
+</head>
+<body>
+<style>
+  /* EMERGENCY FIX FOR HEADER */
+  body {
+    padding-top: 84px !important;
+  }
+  
+  main.container,
+  .deal-main {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+  
+  @media (max-width: 640px) {
+    body {
+      padding-top: 76px !important;
+    }
+  }
+</style>
+  <div data-include="/components/header.html"></div>
+  <main class="container">
+    <h1>Управление доступом</h1>
+    <section class="card" style="padding:16px;margin-bottom:16px">
+      <h2>Пригласить сотрудника</h2>
+      <div class="row">
+        <input id="invEmail" type="email" placeholder="[email protected]" style="max-width:260px"/>
+        <select id="invRole" style="max-width:160px">
+          <option value="STAFF">Сотрудник</option>
+          <option value="OWNER">Владелец</option>
+        </select>
+        <button id="invBtn" class="btn">Отправить приглашение</button>
+      </div>
+      <div class="muted" id="invLink"></div>
+    </section>
+
+    <section class="card" style="padding:16px;margin-bottom:16px">
+      <h2>Участники</h2>
+      <ul id="members" class="list"></ul>
+    </section>
+
+    <section class="card" style="padding:16px">
+      <h2>Audit log (последние 200)</h2>
+      <ul id="logs" class="list"></ul>
+    </section>
+  </main>
+
+  <div data-include="/components/footer.html"></div>
+  <script type="module">
+    import { authInitHeader } from './js/auth.js';
+
+    async function j(path, opts){
+      const res = await fetch(path, { ...opts, headers: { 'Content-Type':'application/json', ...(opts?.headers||{}) } , credentials:'include' });
+      if (!res.ok) throw await res.json().catch(()=>({error:'err'}));
+      return res.json();
+    }
+
+    async function load(){
+      await authInitHeader();
+      const mem = await j('/api/access/list');
+      const wrap = document.getElementById('members');
+      wrap.innerHTML = mem.members.map(m => `
+        <li class="row">
+          <strong>${m.name}</strong> <span class="muted">· ${m.email}</span>
+          <select data-id="${m.id}">
+            <option ${m.role==='OWNER'?'selected':''}>OWNER</option>
+            <option ${m.role==='STAFF'?'selected':''}>STAFF</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" data-save="${m.id}">Сохранить</button>
+        </li>`).join('') || '<li class="muted">Пусто</li>';
+
+      document.querySelectorAll('[data-save]').forEach(btn=>{
+        btn.onclick = async ()=>{
+          const id = btn.dataset.save;
+          const role = wrap.querySelector(`select[data-id="${id}"]`).value;
+          await j('/api/access/update', { method:'POST', body: JSON.stringify({ membershipId:id, role })});
+          alert('Сохранено');
+        };
+      });
+
+      const logs = await j('/api/audit/list');
+      const l = document.getElementById('logs');
+      l.innerHTML = logs.logs.map(x=>`<li>${new Date(x.createdAt).toLocaleString('ru-RU')} — ${x.action} ${x.target ?? ''}</li>`).join('');
+    }
+
+    document.getElementById('invBtn').onclick = async ()=>{
+      const email = document.getElementById('invEmail').value.trim();
+      const role = document.getElementById('invRole').value;
+      const r = await j('/api/orgs/invite', { method:'POST', body: JSON.stringify({ email, role }) });
+      document.getElementById('invLink').textContent = `Ссылка-приглашение: ${r.link}`;
+    };
+
+    load();
+  </script>
+  <script defer src="js/include.js"></script>
+</body>
+</html>

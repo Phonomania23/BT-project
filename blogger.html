@@ -12,26 +12,334 @@
   <script defer src="js/blogger.js"></script>
 
   <style>
-    .page-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 0 24px;}
-    .grid{display:grid;gap:var(--gap);grid-template-columns:repeat(auto-fit,minmax(320px,1fr));}
-    .card{padding:16px;border:1px solid #eee;border-radius:var(--radius);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
-    .card h2{margin:0 0 8px}
-    .subgrid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));}
-    .deal{padding:12px;border:1px solid #efefef;border-radius:10px;display:flex;flex-direction:column;gap:6px}
-    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#f3f3f3;font-size:.85rem}
-    .meta{color:#666;font-size:.9rem}
-    .deal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-    .btn-ghost{padding:8px 10px;border-radius:10px;border:1px solid #ddd;background:#fff}
-    .cols{display:grid;gap:12px;grid-template-columns:1fr 1fr}
-    .cols > div{display:flex;flex-direction:column;gap:12px}
-    canvas{width:100%;height:220px;border:1px solid #efefef;border-radius:10px;background:#fff}
-    .chat-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    select{padding:10px 12px;border-radius:10px;border:1px solid #ddd}
-    .empty{color:#666}
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 20px 0 30px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 30px;
+    }
+    
+    .page-header h1 {
+      margin: 0;
+      color: #fff;
+      font-size: 2.2em;
+    }
+    
+    .grid {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+    
+    .card {
+      padding: 24px;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow-2);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      box-shadow: var(--shadow-1);
+      transform: translateY(-2px);
+    }
+    
+    .card h2 {
+      margin: 0 0 16px 0;
+      color: var(--text-on-surface);
+      font-size: 1.5em;
+      font-weight: 700;
+    }
+    
+    .subgrid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    
+    .deal {
+      padding: 18px;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+    
+    .deal:hover {
+      border-color: var(--accent);
+      transform: translateX(3px);
+    }
+    
+    .deal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
+    .deal-title {
+      color: var(--text-on-surface);
+      font-weight: 600;
+      margin: 0;
+      font-size: 1.1em;
+    }
+    
+    .deal-status {
+      font-size: 0.85em;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+    
+    .status-in-progress {
+      background: rgba(199, 255, 26, 0.2);
+      color: var(--primary-ink);
+      border: 1px solid var(--primary);
+    }
+    
+    .status-awaiting {
+      background: rgba(155, 81, 255, 0.2);
+      color: var(--accent-ink);
+      border: 1px solid var(--accent);
+    }
+    
+    .status-completed {
+      background: rgba(76, 175, 80, 0.2);
+      color: #2e7d32;
+      border: 1px solid #4caf50;
+    }
+    
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(97, 209, 255, 0.15);
+      color: var(--link);
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid rgba(97, 209, 255, 0.3);
+    }
+    
+    .meta {
+      color: var(--text-on-surface);
+      opacity: 0.8;
+      font-size: 0.95rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+    
+    .deal-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    
+    .btn-ghost {
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--surface-border);
+      background: transparent;
+      color: var(--text-on-surface);
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(155, 81, 255, 0.1);
+    }
+    
+    .cols {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    .cols > div {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    canvas {
+      width: 100%;
+      height: 240px;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+    }
+    
+    .chart-container {
+      position: relative;
+    }
+    
+    .chart-title {
+      color: var(--text-on-surface);
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+    
+    .chat-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    select {
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--surface-border);
+      background: var(--surface-2);
+      color: var(--text-on-surface);
+      font-size: 1em;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(155, 81, 255, 0.35);
+    }
+    
+    .empty {
+      color: var(--text-on-surface);
+      opacity: 0.6;
+      font-style: italic;
+      padding: 30px;
+      text-align: center;
+      background: rgba(245, 246, 247, 0.1);
+      border-radius: var(--radius-sm);
+      border: 1px dashed var(--surface-border);
+    }
+    
+    .stats-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 15px;
+      background: var(--surface-2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--surface-border);
+    }
+    
+    .stat-value {
+      font-size: 2em;
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      color: var(--text-on-surface);
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+    
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .action-card {
+      padding: 20px;
+      background: var(--surface-2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--surface-border);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .action-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .action-icon {
+      font-size: 2em;
+      margin-bottom: 10px;
+      display: block;
+    }
+    
+    .action-title {
+      color: var(--text-on-surface);
+      font-weight: 600;
+      margin: 0 0 8px 0;
+    }
+    
+    .action-desc {
+      color: var(--text-on-surface);
+      opacity: 0.7;
+      font-size: 0.9em;
+      margin: 0;
+    }
+    
+    .subgrid-title {
+      margin: 0 0 15px 0;
+      color: var(--text-on-surface);
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .btn:disabled:hover {
+      background-color: var(--btn-bg);
+      border-color: var(--surface-border);
+      transform: none;
+    }
   </style>
 </head>
 <body>
+<style>
+  /* EMERGENCY FIX FOR HEADER */
+  body {
+    padding-top: 84px !important;
+  }
+  
+  main.container,
+  .deal-main {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+  
+  @media (max-width: 640px) {
+    body {
+      padding-top: 76px !important;
+    }
+  }
+</style>
+  
+  <div data-include="/components/header.html"></div>
+  ...
   <div data-include="/components/header.html"></div>
   <div data-include="/components/nav.html"></div>
 
@@ -41,51 +349,261 @@
       <button id="logoutBlogger" class="btn btn-secondary" type="button">Выйти</button>
     </div>
 
+    <!-- Общая статистика -->
+    <div class="stats-overview">
+      <div class="stat-item">
+        <div class="stat-value">12</div>
+        <div class="stat-label">Активных проектов</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">94%</div>
+        <div class="stat-label">Успешных сделок</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">4.8</div>
+        <div class="stat-label">Средний рейтинг</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">24ч</div>
+        <div class="stat-label">Средний ответ</div>
+      </div>
+    </div>
+
     <section class="grid">
       <!-- Текущие проекты -->
       <article class="card" aria-labelledby="projects-title">
-        <h2 id="projects-title">Текущие проекты</h2>
+        <h2 id="projects-title">📋 Текущие проекты</h2>
         <div class="cols">
           <div>
-            <h3 style="margin:0">В работе</h3>
-            <div id="inProgress" class="subgrid" aria-live="polite" aria-busy="true"></div>
+            <h3 class="subgrid-title">В работе</h3>
+            <div id="inProgress" class="subgrid" aria-live="polite" aria-busy="true">
+              <div class="deal">
+                <div class="deal-header">
+                  <h4 class="deal-title">TechBrand - Обзор смартфона</h4>
+                  <span class="deal-status status-in-progress">В работе</span>
+                </div>
+                <p class="meta">Срок: до 15.09.2024 · Бюджет: $1,200</p>
+                <div class="row">
+                  <span class="badge">YouTube</span>
+                  <span class="meta">3 дня осталось</span>
+                </div>
+                <div class="deal-actions">
+                  <button class="btn-ghost">📁 Материалы</button>
+                  <button class="btn-ghost">💬 Чат</button>
+                  <button class="btn-ghost">📤 Сдать работу</button>
+                </div>
+              </div>
+              
+              <div class="deal">
+                <div class="deal-header">
+                  <h4 class="deal-title">FashionStore - Коллекция</h4>
+                  <span class="deal-status status-in-progress">В работе</span>
+                </div>
+                <p class="meta">Срок: до 20.09.2024 · Бюджет: $800</p>
+                <div class="row">
+                  <span class="badge">Instagram</span>
+                  <span class="meta">8 дней осталось</span>
+                </div>
+                <div class="deal-actions">
+                  <button class="btn-ghost">📁 Материалы</button>
+                  <button class="btn-ghost">💬 Чат</button>
+                  <button class="btn-ghost">📤 Сдать работу</button>
+                </div>
+              </div>
+            </div>
           </div>
           <div>
-            <h3 style="margin:0">На проверке</h3>
-            <div id="awaiting" class="subgrid" aria-live="polite" aria-busy="true"></div>
+            <h3 class="subgrid-title">На проверке</h3>
+            <div id="awaiting" class="subgrid" aria-live="polite" aria-busy="true">
+              <div class="deal">
+                <div class="deal-header">
+                  <h4 class="deal-title">GameStudio - Анонс игры</h4>
+                  <span class="deal-status status-awaiting">На проверке</span>
+                </div>
+                <p class="meta">Сдано: 10.09.2024 · Бюджет: $1,500</p>
+                <div class="row">
+                  <span class="badge">YouTube</span>
+                  <span class="meta">Ожидает одобрения</span>
+                </div>
+                <div class="deal-actions">
+                  <button class="btn-ghost">👀 Предпросмотр</button>
+                  <button class="btn-ghost">💬 Чат</button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </article>
 
       <!-- Статистика -->
       <article class="card" aria-labelledby="stats-title">
-        <h2 id="stats-title">Статистика</h2>
-        <p class="meta">Фейковые графики по данным из ваших сделок.</p>
+        <h2 id="stats-title">📊 Статистика</h2>
+        <p class="meta">Динамика показателей за последние 30 дней</p>
         <div class="subgrid">
-          <div>
-            <strong>Аудитория</strong>
-            <canvas id="audChart" width="640" height="220" aria-label="График аудитории" role="img"></canvas>
+          <div class="chart-container">
+            <div class="chart-title">👥 Аудитория</div>
+            <canvas id="audChart" width="640" height="240" aria-label="График роста аудитории" role="img"></canvas>
           </div>
-          <div>
-            <strong>Просмотры</strong>
-            <canvas id="viewsChart" width="640" height="220" aria-label="График просмотров" role="img"></canvas>
+          <div class="chart-container">
+            <div class="chart-title">👀 Просмотры</div>
+            <canvas id="viewsChart" width="640" height="240" aria-label="График просмотров" role="img"></canvas>
           </div>
         </div>
       </article>
 
       <!-- Чат -->
       <article class="card" aria-labelledby="chat-title">
-        <h2 id="chat-title">Чат</h2>
+        <h2 id="chat-title">💬 Чат</h2>
         <div class="chat-controls">
-          <label for="chatDealSelect" class="meta">Проект:</label>
-          <select id="chatDealSelect"></select>
-          <button id="openChatBtn" class="btn" type="button">Открыть переписку</button>
+          <label for="chatDealSelect" class="meta">Выберите проект:</label>
+          <select id="chatDealSelect">
+            <option value="">-- Выберите проект --</option>
+            <option value="1">TechBrand - Обзор смартфона</option>
+            <option value="2">FashionStore - Коллекция</option>
+            <option value="3">GameStudio - Анонс игры</option>
+          </select>
+          <button id="openChatBtn" class="btn" type="button" disabled>Открыть переписку</button>
         </div>
         <p class="meta">Или откройте детали проекта и перейдите на вкладку «Чат».</p>
+        
+        <div class="quick-actions">
+          <div class="action-card" onclick="location.href='#notifications'">
+            <span class="action-icon">🔔</span>
+            <div class="action-title">Уведомления</div>
+            <div class="action-desc">3 новых сообщения</div>
+          </div>
+          <div class="action-card" onclick="location.href='#profile'">
+            <span class="action-icon">👤</span>
+            <div class="action-title">Профиль</div>
+            <div class="action-desc">Редактировать данные</div>
+          </div>
+          <div class="action-card" onclick="location.href='#finance'">
+            <span class="action-icon">💰</span>
+            <div class="action-title">Финансы</div>
+            <div class="action-desc">Баланс: $2,300</div>
+          </div>
+        </div>
       </article>
     </section>
+
+    <!-- Завершенные проекты -->
+    <article class="card" style="margin-top: 30px;">
+      <h2>✅ Завершенные проекты</h2>
+      <div class="subgrid">
+        <div class="deal">
+          <div class="deal-header">
+            <h4 class="deal-title">CosmeticBrand - Обзор продукции</h4>
+            <span class="deal-status status-completed">Завершен</span>
+          </div>
+          <p class="meta">Завершен: 05.09.2024 · Получено: $950</p>
+          <div class="row">
+            <span class="badge">Instagram</span>
+            <span class="meta">⭐ 4.8/5</span>
+          </div>
+        </div>
+        
+        <div class="deal">
+          <div class="deal-header">
+            <h4 class="deal-title">TravelAgency - Тур по Бали</h4>
+            <span class="deal-status status-completed">Завершен</span>
+          </div>
+          <p class="meta">Завершен: 28.08.2024 · Получено: $1,200</p>
+          <div class="row">
+            <span class="badge">YouTube</span>
+            <span class="meta">⭐ 5.0/5</span>
+          </div>
+        </div>
+      </div>
+    </article>
   </main>
 
   <div data-include="/components/footer.html"></div>
+<div class="folders-sidebar" id="foldersSidebar">
+    <!-- Содержимое будет сгенерировано JavaScript -->
+</div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Загрузка имени блогера
+      const bloggerName = localStorage.getItem('bloggerName') || 'Demo Blogger';
+      document.getElementById('bloggerName').textContent = bloggerName;
+      
+      // Обработчик выхода
+      document.getElementById('logoutBlogger').addEventListener('click', function() {
+        localStorage.removeItem('bloggerName');
+        localStorage.removeItem('userRole');
+        window.location.href = 'index.html';
+      });
+      
+      // Элементы для управления чатом
+      const dealSelect = document.getElementById('chatDealSelect');
+      const openChatBtn = document.getElementById('openChatBtn');
+      
+      // Функция для обновления состояния кнопки открытия чата
+      function updateChatButtonState() {
+        openChatBtn.disabled = !dealSelect.value;
+      }
+      
+      // Обновлять состояние кнопки при изменении выбора
+      if (dealSelect && openChatBtn) {
+        dealSelect.addEventListener('change', updateChatButtonState);
+        // Установить начальное состояние
+        updateChatButtonState();
+      }
+      
+      // Открытие чата
+      if (openChatBtn) {
+        openChatBtn.addEventListener('click', function() {
+          const selectedDeal = dealSelect.value;
+          if (!selectedDeal) {
+            alert('Пожалуйста, выберите проект для переписки');
+            return;
+          }
+          // Здесь будет логика открытия чата
+          alert('Чат открыт для выбранного проекта: ' + dealSelect.options[dealSelect.selectedIndex].text);
+        });
+      }
+      
+      // Имитация загрузки данных
+      setTimeout(() => {
+        const inProgress = document.getElementById('inProgress');
+        const awaiting = document.getElementById('awaiting');
+        
+        if (inProgress) inProgress.setAttribute('aria-busy', 'false');
+        if (awaiting) awaiting.setAttribute('aria-busy', 'false');
+        
+        // Имитация графиков
+        simulateCharts();
+      }, 1000);
+      
+      function simulateCharts() {
+        // Заглушка для инициализации графиков
+        // Реальная реализация будет зависеть от подключенной библиотеки Chart.js
+        const audCanvas = document.getElementById('audChart');
+        const viewsCanvas = document.getElementById('viewsChart');
+        
+        if (audCanvas && viewsCanvas) {
+          console.log('Элементы canvas для графиков найдены. Готово для инициализации Chart.js');
+          // Здесь будет код инициализации графиков, когда библиотека будет подключена
+          // new Chart(audCanvas.getContext('2d'), { ... });
+          // new Chart(viewsCanvas.getContext('2d'), { ... });
+        }
+      }
+    });
+  </script>
+</main>
+<div data-include="/components/footer.html"></div>
+
+<script>
+// EMERGENCY FIX FOR BLOGGER.HTML
+document.addEventListener('DOMContentLoaded', function() {
+  document.body.style.paddingTop = '84px';
+  const main = document.querySelector('main.container');
+  if (main) {
+    main.style.paddingTop = '0';
+    main.style.marginTop = '0';
+  }
+  if (window.innerWidth <= 640) document.body.style.paddingTop = '76px';
+});
+</script>
 </body>
 </html>

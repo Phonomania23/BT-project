@@ -10,205 +10,24 @@
   <link rel="stylesheet" href="../css/layout.css?v=20250901" />
   <link rel="stylesheet" href="../css/deal.css?v=20250901" />
 
+  <!-- Небольшие правки под web-component и графики -->
   <style>
-    /* Дополнительные стили для улучшения UI/UX */
-    .step-active {
-      background-color: #e8f4fd;
-      border-left: 4px solid #2196F3;
-      font-weight: bold;
-    }
-    
-    .tab-active {
-      background-color: #f5f5f5;
-      border-bottom: 3px solid #2196F3;
-    }
-    
-    .chip-filter {
-      display: inline-flex;
-      align-items: center;
-      background: #f0f0f0;
-      padding: 6px 12px;
-      border-radius: 16px;
-      margin: 4px;
-      font-size: 14px;
-    }
-    
-    .chip-filter button {
-      background: none;
-      border: none;
-      margin-left: 6px;
-      cursor: pointer;
-      color: #666;
-    }
-    
-    .blogger-card {
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .blogger-card:hover {
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .blogger-card.selected {
-      background-color: #e8f4fd;
-      border-color: #2196F3;
-    }
-    
-    .status-indicator {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      margin-right: 6px;
-    }
-    
-    .status-success { background-color: #4CAF50; }
-    .status-waiting { background-color: #FFC107; }
-    .status-error { background-color: #F44336; }
-
-    /* Стили для фильтров */
-    .filterbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin: 16px 0;
-      padding: 16px;
-      background: #f8f9fa;
-      border-radius: 12px;
-      border: 1px solid #e0e0e0;
-    }
-    
-    .chip {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: white;
-      border: 1px solid #e0e0e0;
-      border-radius: 20px;
-    }
-    
-    .chip label {
-      font-weight: 600;
-      font-size: 14px;
-      color: #333;
-      white-space: nowrap;
-    }
-    
-    .chip input, .chip select {
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 6px 8px;
-      font-size: 14px;
-    }
-    
-    .chip input:focus, .chip select:focus {
-      outline: none;
-      border-color: #2196F3;
-      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
-    }
-    
-    .cards-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: grid;
-      gap: 12px;
-    }
-    
-    .card-blogger {
-      background: white;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      padding: 16px;
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 12px;
-      align-items: start;
-    }
-    
-    .card-blogger .avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #f0f0f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: #666;
-    }
-    
-    .card-blogger .name {
-      font-weight: 700;
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 4px;
-    }
-    
-    .card-blogger .meta {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
-    
-    .card-blogger .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      background: #e3f2fd;
-      color: #1976d2;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-      margin-right: 6px;
-    }
-    
-    .card-blogger .actions {
-      margin-top: 8px;
-    }
-    
-    .select-radio {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 12px 0;
-      padding: 12px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border: 1px solid #e0e0e0;
-    }
-    
-    /* Стили для логотипа в шапке */
-    .header-logo {
-      font-weight: bold;
-      font-size: 1.2em;
-      color: #333;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-    }
+    /* чтобы web-component корректно участвовал в гриде/списке */
+    .cards-list blogger-card { display:block; }
+    /* спарклайны из компонента */
+    .sl { width:180px; height:44px; }
+    .sl path { fill:none; stroke:rgba(25,118,210,.9); stroke-width:2; }
   </style>
+
+  <!-- Скрипты (ВАЖЕН ПОРЯДОК) -->
+  <script defer src="../js/include.js?v=6"></script>
+  <script defer src="../js/cards.js?v=6"></script>
+  <script defer src="../js/components/blogger-card.js?v=6"></script>
+  <script defer src="../js/filters.js?v=6"></script>
+  <script defer src="../js/deal-router.js?v=6"></script>
 </head>
 <body>
-  <!-- Шапка с логотипом для возврата на главную -->
-  <header class="header">
-    <div class="container">
-      <a href="/" class="header-logo">Bloggers.tools</a>
-    </div>
-  </header>
+  <div data-include="/components/header.html"></div>
 
   <div class="deal-wrap container">
     <!-- Сайдбар-воронка -->
@@ -242,10 +61,10 @@
       </div>
 
       <!-- Хост для контента шагов -->
-      <section id="stepHost" class="card" style="padding:20px"></section>
+      <section id="stepHost" class="card" style="padding:16px"></section>
 
       <!-- Нижняя навигация -->
-      <footer class="deal-footer row" style="justify-content:space-between;margin-top:20px">
+      <footer class="deal-footer row" style="justify-content:space-between">
         <button id="prevBtn" class="btn btn-secondary" type="button">Назад</button>
         <div class="muted">Этап <span id="stepNow">1</span> из 9</div>
         <button id="nextBtn" class="btn" type="button">Далее</button>
@@ -257,9 +76,26 @@
 
   <!-- ================== ШАБЛОНЫ ШАГОВ ================== -->
 
-  <!-- Шаг 1: Подбор -->
+  <!-- Шаг 1: Подбор (AI + расширенные фильтры + подписчики в тыс.) -->
   <template id="tpl-1-pick">
-    <h2 style="margin-bottom:20px">Подбор блогеров</h2>
+    <h2>Подбор блогеров</h2>
+
+    <!-- Верхняя панель: AI-поиск + ручные фильтры -->
+    <div class="aibar card" style="margin-bottom:12px;padding:12px">
+      <div class="row" style="align-items:flex-end;gap:12px">
+        <div class="field" style="flex:1;min-width:260px">
+          <label>AI search (опционально)</label>
+          <input id="aiQuery" type="text" placeholder="English YouTube, followers 50k–100k, ER > 4%…" />
+        </div>
+        <button id="aiApply" class="btn" type="button">Применить AI-запрос</button>
+        <button id="aiClear" class="btn btn-secondary" type="button">Сброс</button>
+      </div>
+      <div class="muted" style="margin-top:6px">
+        Поддерживаются фразы:
+        <code>followers 10k-100k</code>, <code>ER 3-7</code>, <code>language english</code>,
+        <code>country RU</code>, <code>similar to Wylsacom</code>, <code>top ER</code> и т.п.
+      </div>
+    </div>
 
     <!-- ФИЛЬТР-БАР -->
     <form id="filtersForm" class="filterbar" onsubmit="return false">
@@ -275,53 +111,124 @@
         </select>
       </div>
 
-      <!-- Подписчики -->
+      <!-- Подписчики (тыс.) -->
       <div class="chip">
         <label>Подписчики (тыс.)</label>
-        <input id="followersMinK" type="number" min="0" step="1" placeholder="от" style="width:80px" />
+        <input id="followersMinK" type="number" min="0" step="1" placeholder="от" style="width:90px" />
         <span class="muted">—</span>
-        <input id="followersMaxK" type="number" min="0" step="1" placeholder="до" style="width:80px" />
+        <input id="followersMaxK" type="number" min="0" step="1" placeholder="до" style="width:90px" />
       </div>
 
       <!-- Рубрика -->
       <div class="chip">
         <label>Рубрика</label>
-        <input id="fCategory" type="text" placeholder="техника, красота…" style="width:120px" />
+        <input id="fCategory" type="text" placeholder="техника, красота…" />
       </div>
 
-      <!-- Демография -->
+      <!-- Демография (аудитория) -->
       <div class="chip">
         <label>Audience geo</label>
         <select id="fGeo">
           <option value="">Любая</option>
-          <option>RU</option>
-          <option>EN</option>
-          <option>ES</option>
-          <option>FR</option>
-          <option>CN</option>
+          <option>RU</option><option>KZ</option><option>BY</option>
+          <option>UA</option><option>GE</option><option>TR</option>
+        </select>
+        <input id="fGeoShare" type="number" min="0" max="100" step="5" value="0" title="% аудитории" style="width:76px" />
+        <span class="muted">%</span>
+      </div>
+
+      <div class="chip">
+        <label>Audience gender</label>
+        <select id="fGender">
+          <option value="">Любой</option>
+          <option value="female">Преимущественно женщины</option>
+          <option value="male">Преимущественно мужчины</option>
+        </select>
+        <span class="muted" title="по умолчанию выборка=60%">(60%)</span>
+      </div>
+
+      <div class="chip">
+        <label>Audience age (мин %)</label>
+        <select id="fAgeBucket">
+          <option value="">Любой</option>
+          <option>13-17</option><option>18-24</option><option>25-34</option>
+          <option>35-44</option><option>45-64</option><option>65+</option>
+        </select>
+        <input id="fAgeShare" type="number" min="0" max="100" step="5" value="0" style="width:76px" />
+        <span class="muted">%</span>
+      </div>
+
+      <!-- ER и просмотры -->
+      <div class="chip">
+        <label>ER (последние 30 постов)</label>
+        <input id="fErMin" type="number" placeholder="мин" min="0" step="0.1" style="width:90px" />
+        <span class="muted">—</span>
+        <input id="fErMax" type="number" placeholder="макс" min="0" step="0.1" style="width:90px" />
+      </div>
+
+      <div class="chip">
+        <label>Views / post</label>
+        <input id="fViewsMin" type="number" placeholder="мин" min="0" step="1000" style="width:120px" />
+      </div>
+
+      <!-- Цена -->
+      <div class="chip">
+        <label>Цена (integrated), USD</label>
+        <input id="fPriceMin" type="number" placeholder="от" min="0" step="100" style="width:120px" />
+        <span class="muted">—</span>
+        <input id="fPriceMax" type="number" placeholder="до" min="0" step="100" style="width:120px" />
+      </div>
+
+      <!-- Прочее -->
+      <div class="chip">
+        <label>Язык автора</label>
+        <select id="fLang">
+          <option value="">Любой</option>
+          <option value="ru">Русский</option>
+          <option value="en">English</option>
         </select>
       </div>
 
-      <!-- ER / Views -->
       <div class="chip">
-        <label>ER, %</label>
-        <input id="fErMin" type="number" placeholder="мин" min="0" max="100" step="0.1" style="width:80px" />
-        <span class="muted">—</span>
-        <input id="fErMax" type="number" placeholder="макс" min="1" max="100" step="0.1" style="width:80px" />
+        <label>Страна автора</label>
+        <select id="fCountry">
+          <option value="">Любая</option>
+          <option>RU</option><option>UA</option><option>KZ</option><option>BY</option><option>GE</option><option>TR</option>
+        </select>
       </div>
 
-      <!-- Цена в USD -->
       <div class="chip">
-        <label>Цена (USD)</label>
-        <input id="fPriceMin" type="number" placeholder="от" min="0" max="10000" step="100" style="width:100px" />
-        <span class="muted">—</span>
-        <input id="fPriceMax" type="number" placeholder="до" min="1" max="10000" step="100" style="width:100px" />
+        <label>Contacts</label>
+        <label class="switch"><input id="fHasEmail" type="checkbox" /><span>только с email</span></label>
       </div>
 
-      <!-- Поиск -->
+      <!-- AI-фильтры (дополнительные) -->
+      <div class="chip">
+        <label>Lookalikes</label>
+        <input id="fSimilarTo" type="text" placeholder="похожие на…" style="width:180px" />
+      </div>
+      <div class="chip">
+        <label class="switch"><input id="fTopER" type="checkbox" /><span>Top 25% по ER</span></label>
+      </div>
+
+      <!-- Поиск + сортировка -->
       <div class="chip">
         <label>Поиск</label>
-        <input id="fQuery" type="search" placeholder="имя/ниша/теги…" style="width:150px" />
+        <input id="fQuery" type="search" placeholder="имя/ниша/теги…" />
+      </div>
+
+      <div class="chip">
+        <label>Сортировка</label>
+        <select id="fSortBy">
+          <option value="followers">Подписчики</option>
+          <option value="er">ER</option>
+          <option value="views">Просмотры</option>
+          <option value="price">Цена</option>
+        </select>
+        <select id="fSortDir">
+          <option value="desc">по убыв.</option>
+          <option value="asc">по возр.</option>
+        </select>
       </div>
 
       <button id="clearFilters" class="btn btn-secondary" type="button" style="margin-left:auto">Очистить фильтры</button>
@@ -331,10 +238,10 @@
     <div id="activeChips" class="chips"></div>
 
     <!-- Статистика + кнопки -->
-    <div class="row" style="justify-content:space-between;margin:20px 0;align-items:center">
+    <div class="row" style="justify-content:space-between;margin:10px 0">
       <div class="muted">Результатов: <span id="resultsCount">0</span> · Выбрано: <span id="pickedCount">0</span></div>
       <div class="row">
-        <button id="selectAll" class="btn btn-secondary" type="button">Выбрать все</button>
+        <button id="selectAll" class="btn btn-secondary" type="button">Выбрать все (фильтр)</button>
         <button id="clearPicked" class="btn btn-secondary" type="button">Очистить выбор</button>
       </div>
     </div>
@@ -343,7 +250,7 @@
     <ul id="resultsList" class="cards-list"></ul>
   </template>
 
-  <!-- Остальные шаги остаются без изменений -->
+  <!-- Шаг 2: Бриф -->
   <template id="tpl-2-brief">
     <h2>Бриф</h2>
     <form id="briefForm" class="grid">
@@ -364,6 +271,7 @@
     </form>
   </template>
 
+  <!-- Шаг 3: Привязка почты -->
   <template id="tpl-3-email">
     <h2>Привязка почты</h2>
     <div class="row">
@@ -373,6 +281,7 @@
     </div>
   </template>
 
+  <!-- Шаг 4: Рассылка -->
   <template id="tpl-4-outreach">
     <h2>Рассылка</h2>
     <p class="muted">Выбранные на шаге 1 блогеры будут предложены получателями.</p>
@@ -385,6 +294,7 @@
     <button id="markRespondBtn" class="btn btn-secondary">Отметить ответы</button>
   </template>
 
+  <!-- Шаг 5: Договор -->
   <template id="tpl-5-contract">
     <h2>Договор</h2>
     <div class="row">
@@ -393,6 +303,7 @@
     </div>
   </template>
 
+  <!-- Шаг 6: Оплата -->
   <template id="tpl-6-payment">
     <h2>Оплата</h2>
     <div class="row">
@@ -401,6 +312,7 @@
     </div>
   </template>
 
+  <!-- Шаг 7: Съёмка черновика -->
   <template id="tpl-7-shoot">
     <h2>Съёмка черновика</h2>
     <div class="row">
@@ -410,6 +322,7 @@
     </div>
   </template>
 
+  <!-- Шаг 8: Одобрение рекламы -->
   <template id="tpl-8-approval">
     <h2>Одобрение</h2>
     <div class="field">
@@ -427,688 +340,10 @@
     </div>
   </template>
 
+  <!-- Шаг 9: Выплата блогеру -->
   <template id="tpl-9-payout">
     <h2>Выплата блогеру</h2>
     <div id="payoutInfo" class="muted">Будет проведена автоматически после «Принять».</div>
   </template>
-
-  <script>
-    // Основная логика приложения
-    document.addEventListener('DOMContentLoaded', function() {
-      // Текущее состояние приложения
-      const appState = {
-        currentStep: 1,
-        selectedBloggers: [],
-        briefData: null,
-        emailLinked: false,
-        outreachSent: false,
-        responses: [],
-        contractSigned: false,
-        paymentReserved: false,
-        videoUploaded: false,
-        approved: false
-      };
-      
-      // Данные блогеров с дополнительными полями для фильтрации
-      const mockBloggers = [
-        { id: 1, name: "Иван Петров", platform: "YouTube", followers: 125000, er: 4.5, category: "техника", price: 2500, email: "ivan@example.com", geo: "RU" },
-        { id: 2, name: "Анна Сидорова", platform: "Instagram", followers: 87000, er: 7.2, category: "красота", price: 1800, email: "anna@example.com", geo: "RU" },
-        { id: 3, name: "Сергей Козлов", platform: "YouTube", followers: 356000, er: 3.8, category: "игры", price: 4200, email: "sergey@example.com", geo: "RU" },
-        { id: 4, name: "Мария Иванова", platform: "TikTok", followers: 210000, er: 8.1, category: "мода", price: 1900, email: "maria@example.com", geo: "EN" },
-        { id: 5, name: "Дмитрий Смирнов", platform: "Telegram", followers: 45000, er: 5.5, category: "новости", price: 1200, email: "dmitry@example.com", geo: "RU" },
-        { id: 6, name: "Ольга Кузнецова", platform: "YouTube", followers: 98000, er: 6.2, category: "кулинария", price: 1600, email: "olga@example.com", geo: "RU" },
-        { id: 7, name: "Алексей Попов", platform: "TikTok", followers: 320000, er: 5.8, category: "юмор", price: 2800, email: "alex@example.com", geo: "EN" },
-        { id: 8, name: "Елена Васнецова", platform: "Instagram", followers: 145000, er: 6.9, category: "здоровье", price: 2200, email: "elena@example.com", geo: "ES" },
-        { id: 9, name: "Карлос Санчес", platform: "YouTube", followers: 89000, er: 9.2, category: "путешествия", price: 1900, email: "carlos@example.com", geo: "ES" },
-        { id: 10, name: "Пьер Дюпон", platform: "Instagram", followers: 112000, er: 8.7, category: "мода", price: 2100, email: "pierre@example.com", geo: "FR" },
-        { id: 11, name: "Ли Вей", platform: "TikTok", followers: 480000, er: 7.8, category: "техника", price: 3500, email: "li@example.com", geo: "CN" },
-        { id: 12, name: "Чжан Мин", platform: "YouTube", followers: 125000, er: 6.5, category: "образование", price: 1800, email: "zhang@example.com", geo: "CN" }
-      ];
-      
-      // Инициализация приложения
-      function initApp() {
-        setupRouter();
-        setupEventListeners();
-        renderStep(1);
-        updateNavigation();
-      }
-      
-      // Настройка маршрутизации
-      function setupRouter() {
-        window.addEventListener('hashchange', handleHashChange);
-        handleHashChange();
-      }
-      
-      // Обработчик изменения хэша
-      function handleHashChange() {
-        const hash = window.location.hash;
-        const match = hash.match(/#\/(\d)-/);
-        
-        if (match && match[1]) {
-          const step = parseInt(match[1]);
-          if (step >= 1 && step <= 9) {
-            renderStep(step);
-          }
-        }
-      }
-      
-      // Настройка обработчиков событий
-      function setupEventListeners() {
-        // Навигация по шагам
-        document.getElementById('prevBtn').addEventListener('click', goToPrevStep);
-        document.getElementById('nextBtn').addEventListener('click', goToNextStep);
-        
-        // Нажатие на шаги в сайдбаре
-        const stepLinks = document.querySelectorAll('#dealNav a');
-        stepLinks.forEach(link => {
-          link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const step = parseInt(this.getAttribute('data-step'));
-            renderStep(step);
-          });
-        });
-        
-        // Нажатие на табы
-        const tabButtons = document.querySelectorAll('#dealTabs button');
-        tabButtons.forEach(button => {
-          button.addEventListener('click', function() {
-            const step = parseInt(this.getAttribute('data-step'));
-            renderStep(step);
-          });
-        });
-      }
-      
-      // Получить slug для шага
-      function getStepSlug(step) {
-        const slugs = [
-          '', 'pick', 'brief', 'email', 'outreach', 
-          'contract', 'payment', 'shoot', 'approval', 'payout'
-        ];
-        return slugs[step];
-      }
-      
-      // Рендер шага
-      function renderStep(step) {
-        appState.currentStep = step;
-        
-        // Обновляем UI
-        updateStepIndicator(step);
-        updateNavigation();
-        
-        // Загружаем контент шага
-        const template = document.getElementById(`tpl-${step}-${getStepSlug(step)}`);
-        if (template) {
-          document.getElementById('stepHost').innerHTML = template.innerHTML;
-          
-          // После рендера шага, инициализируем специфичные для шага обработчики
-          initStepSpecificHandlers(step);
-        }
-        
-        // Обновляем URL
-        window.location.hash = `#/${step}-${getStepSlug(step)}`;
-      }
-      
-      // Инициализация обработчиков для конкретного шага
-      function initStepSpecificHandlers(step) {
-        if (step === 1) {
-          initFilters();
-          renderBloggersList();
-        } else if (step === 2 && appState.briefData) {
-          document.getElementById('briefGoal').value = appState.briefData.goal || '';
-          document.getElementById('briefBudget').value = appState.briefData.budget || '';
-          document.getElementById('briefDeadline').value = appState.briefData.deadline || '';
-        } else if (step === 3 && appState.emailLinked) {
-          document.getElementById('emailStatus').textContent = '✓ Почта привязана';
-        } else if (step === 4) {
-          renderOutreachList();
-        }
-      }
-      
-      // Обновление индикатора текущего шага
-      function updateStepIndicator(step) {
-        // Обновляем сайдбар
-        const navLinks = document.querySelectorAll('#dealNav a');
-        navLinks.forEach(link => {
-          const linkStep = parseInt(link.getAttribute('data-step'));
-          if (linkStep === step) {
-            link.classList.add('step-active');
-            link.style.fontWeight = 'bold';
-          } else {
-            link.classList.remove('step-active');
-            link.style.fontWeight = 'normal';
-          }
-        });
-        
-        // Обновляем табы
-        const tabButtons = document.querySelectorAll('#dealTabs button');
-        tabButtons.forEach(button => {
-          const buttonStep = parseInt(button.getAttribute('data-step'));
-          if (buttonStep === step) {
-            button.classList.add('tab-active');
-            button.style.fontWeight = 'bold';
-          } else {
-            button.classList.remove('tab-active');
-            button.style.fontWeight = 'normal';
-          }
-        });
-        
-        // Обновляем номер текущего шага
-        document.getElementById('stepNow').textContent = step;
-      }
-      
-      // Обновление навигации
-      function updateNavigation() {
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        
-        if (appState.currentStep === 1) {
-          prevBtn.disabled = true;
-          prevBtn.style.visibility = 'hidden';
-        } else {
-          prevBtn.disabled = false;
-          prevBtn.style.visibility = 'visible';
-        }
-        
-        if (appState.currentStep === 9) {
-          nextBtn.textContent = 'Завершить';
-        } else {
-          nextBtn.textContent = 'Далее';
-        }
-      }
-      
-      // Переход к предыдущему шагу
-      function goToPrevStep() {
-        if (appState.currentStep > 1) {
-          renderStep(appState.currentStep - 1);
-        }
-      }
-      
-      // Переход к следующему шагу
-      function goToNextStep() {
-        if (appState.currentStep < 9) {
-          renderStep(appState.currentStep + 1);
-        } else {
-          alert('Сделка успешно завершена!');
-        }
-      }
-      
-      // Шаг 1: Инициализация фильтров
-      function initFilters() {
-        const filterInputs = [
-          'fPlatform', 'followersMinK', 'followersMaxK', 'fCategory', 
-          'fGeo', 'fErMin', 'fErMax', 'fPriceMin', 'fPriceMax', 'fQuery'
-        ];
-        
-        filterInputs.forEach(id => {
-          const element = document.getElementById(id);
-          if (element) {
-            element.addEventListener('input', applyFilters);
-            element.addEventListener('change', applyFilters);
-          }
-        });
-        
-        // Кнопка очистки
-        const clearBtn = document.getElementById('clearFilters');
-        if (clearBtn) {
-          clearBtn.addEventListener('click', clearAllFilters);
-        }
-        
-        // Кнопки выбора
-        document.getElementById('selectAll')?.addEventListener('click', selectAllFiltered);
-        document.getElementById('clearPicked')?.addEventListener('click', clearSelectedBloggers);
-      }
-      
-      // Шаг 1: Применение фильтров
-      function applyFilters() {
-        renderBloggersList();
-        updateActiveChips();
-      }
-      
-      // Шаг 1: Очистка всех фильтров
-      function clearAllFilters() {
-        const fieldsToClear = [
-          'fPlatform', 'followersMinK', 'followersMaxK', 'fCategory',
-          'fGeo', 'fErMin', 'fErMax', 'fPriceMin', 'fPriceMax', 'fQuery'
-        ];
-        
-        fieldsToClear.forEach(id => {
-          const element = document.getElementById(id);
-          if (element) element.value = '';
-        });
-        
-        applyFilters();
-      }
-      
-      // Шаг 1: Обновление активных чипов
-      function updateActiveChips() {
-        const chipsContainer = document.getElementById('activeChips');
-        chipsContainer.innerHTML = '';
-        
-        const platform = document.getElementById('fPlatform')?.value;
-        const minFollowers = document.getElementById('followersMinK')?.value;
-        const maxFollowers = document.getElementById('followersMaxK')?.value;
-        const category = document.getElementById('fCategory')?.value;
-        const geo = document.getElementById('fGeo')?.value;
-        const erMin = document.getElementById('fErMin')?.value;
-        const erMax = document.getElementById('fErMax')?.value;
-        const priceMin = document.getElementById('fPriceMin')?.value;
-        const priceMax = document.getElementById('fPriceMax')?.value;
-        const query = document.getElementById('fQuery')?.value;
-        
-        if (platform) {
-          addFilterChip('Платформа: ' + platform, () => {
-            document.getElementById('fPlatform').value = '';
-            applyFilters();
-          });
-        }
-        
-        if (minFollowers) {
-          addFilterChip('Подписчики от: ' + minFollowers + 'k', () => {
-            document.getElementById('followersMinK').value = '';
-            applyFilters();
-          });
-        }
-        
-        if (maxFollowers) {
-          addFilterChip('Подписчики до: ' + maxFollowers + 'k', () => {
-            document.getElementById('followersMaxK').value = '';
-            applyFilters();
-          });
-        }
-        
-        if (category) {
-          addFilterChip('Рубрика: ' + category, () => {
-            document.getElementById('fCategory').value = '';
-            applyFilters();
-          });
-        }
-        
-        if (geo) {
-          addFilterChip('Гео: ' + geo, () => {
-            document.getElementById('fGeo').value = '';
-            applyFilters();
-          });
-        }
-        
-        if (erMin) {
-          addFilterChip('ER от: ' + erMin + '%', () => {
-            document.getElementById('fErMin').value = '';
-            applyFilters();
-          });
-        }
-        
-        if (erMax) {
-          addFilterChip('ER до: ' + erMax + '%', () => {
-            document.getElementById('fErMax').value = '';
-            applyFilters();
-          });
-        }
-        
-        if (priceMin) {
-          addFilterChip('Цена от: ' + priceMin + '$', () => {
-            document.getElementById('fPriceMin').value = '';
-            applyFilters();
-          });
-        }
-        
-        if (priceMax) {
-          addFilterChip('Цена до: ' + priceMax + '$', () => {
-            document.getElementById('fPriceMax').value = '';
-            applyFilters();
-          });
-        }
-        
-        if (query) {
-          addFilterChip('Поиск: ' + query, () => {
-            document.getElementById('fQuery').value = '';
-            applyFilters();
-          });
-        }
-      }
-      
-      // Шаг 1: Добавление чипа фильтра
-      function addFilterChip(text, onClick) {
-        const chip = document.createElement('div');
-        chip.className = 'chip-filter';
-        chip.innerHTML = `
-          ${text}
-          <button type="button">×</button>
-        `;
-        chip.querySelector('button').addEventListener('click', onClick);
-        document.getElementById('activeChips').appendChild(chip);
-      }
-      
-      // Шаг 1: Рендер списка блогеров
-      function renderBloggersList() {
-        const listContainer = document.getElementById('resultsList');
-        if (!listContainer) return;
-        
-        listContainer.innerHTML = '';
-        
-        // Получаем значения фильтров
-        const platformFilter = document.getElementById('fPlatform').value;
-        const minFollowers = parseInt(document.getElementById('followersMinK').value) || 0;
-        const maxFollowers = parseInt(document.getElementById('followersMaxK').value) || Infinity;
-        const categoryFilter = document.getElementById('fCategory').value.toLowerCase();
-        const geoFilter = document.getElementById('fGeo').value;
-        const erMin = parseFloat(document.getElementById('fErMin').value) || 0;
-        const erMax = parseFloat(document.getElementById('fErMax').value) || Infinity;
-        const priceMin = parseInt(document.getElementById('fPriceMin').value) || 0;
-        const priceMax = parseInt(document.getElementById('fPriceMax').value) || Infinity;
-        const queryFilter = document.getElementById('fQuery').value.toLowerCase();
-        
-        // Фильтруем блогеров
-        let filteredBloggers = mockBloggers.filter(blogger => {
-          // Фильтр по платформе
-          if (platformFilter && blogger.platform !== platformFilter) {
-            return false;
-          }
-          
-          // Фильтр по подписчикам
-          const followersK = blogger.followers / 1000;
-          if (followersK < minFollowers || followersK > maxFollowers) {
-            return false;
-          }
-          
-          // Фильтр по категории
-          if (categoryFilter && !blogger.category.toLowerCase().includes(categoryFilter)) {
-            return false;
-          }
-          
-          // Фильтр по гео
-          if (geoFilter && blogger.geo !== geoFilter) {
-            return false;
-          }
-          
-          // Фильтр по ER
-          if (blogger.er < erMin || blogger.er > erMax) {
-            return false;
-          }
-          
-          // Фильтр по цене
-          if (blogger.price < priceMin || blogger.price > priceMax) {
-            return false;
-          }
-          
-          // Поисковый запрос
-          if (queryFilter && !(
-            blogger.name.toLowerCase().includes(queryFilter) ||
-            blogger.category.toLowerCase().includes(queryFilter) ||
-            blogger.platform.toLowerCase().includes(queryFilter)
-          )) {
-            return false;
-          }
-          
-          return true;
-        });
-        
-        // Обновляем счетчики
-        document.getElementById('resultsCount').textContent = filteredBloggers.length;
-        document.getElementById('pickedCount').textContent = appState.selectedBloggers.length;
-        
-        // Рендерим результаты
-        if (filteredBloggers.length === 0) {
-          listContainer.innerHTML = '<li class="muted">Ничего не найдено. Попробуйте изменить фильтры.</li>';
-          return;
-        }
-        
-        filteredBloggers.forEach(blogger => {
-          const isSelected = appState.selectedBloggers.some(b => b.id === blogger.id);
-          const card = document.createElement('li');
-          card.className = `card-blogger ${isSelected ? 'selected' : ''}`;
-          card.innerHTML = `
-            <div class="avatar">${blogger.name.charAt(0)}</div>
-            <div>
-              <div class="name">${blogger.name}</div>
-              <div class="meta">
-                <span class="badge">${blogger.platform}</span>
-                <span class="badge">${blogger.category}</span>
-                <span class="badge">${blogger.geo}</span>
-              </div>
-              <div class="meta">
-                Подписчики: ${(blogger.followers / 1000).toFixed(0)}K · 
-                ER: ${blogger.er}% · 
-                Цена: ${blogger.price}$
-              </div>
-              <div class="actions">
-                <label class="select-radio">
-                  <input type="checkbox" ${isSelected ? 'checked' : ''} 
-                         onchange="toggleBloggerSelection(${blogger.id})" />
-                  В выборку
-                </label>
-              </div>
-            </div>
-          `;
-          
-          listContainer.appendChild(card);
-        });
-      }
-      
-      // Шаг 1: Переключение выбора блогера (глобальная функция)
-      window.toggleBloggerSelection = function(bloggerId) {
-        const blogger = mockBloggers.find(b => b.id === bloggerId);
-        if (!blogger) return;
-        
-        const index = appState.selectedBloggers.findIndex(b => b.id === bloggerId);
-        
-        if (index === -1) {
-          appState.selectedBloggers.push(blogger);
-        } else {
-          appState.selectedBloggers.splice(index, 1);
-        }
-        
-        document.getElementById('pickedCount').textContent = appState.selectedBloggers.length;
-        
-        // Обновляем UI
-        const card = document.querySelector(`.card-blogger[data-id="${bloggerId}"]`);
-        if (card) {
-          card.classList.toggle('selected');
-          const checkbox = card.querySelector('input[type="checkbox"]');
-          if (checkbox) checkbox.checked = !checkbox.checked;
-        }
-      };
-      
-      // Шаг 1: Выбрать все отфильтрованные
-      function selectAllFiltered() {
-        const platformFilter = document.getElementById('fPlatform').value;
-        const minFollowers = parseInt(document.getElementById('followersMinK').value) || 0;
-        const maxFollowers = parseInt(document.getElementById('followersMaxK').value) || Infinity;
-        const categoryFilter = document.getElementById('fCategory').value.toLowerCase();
-        const queryFilter = document.getElementById('fQuery').value.toLowerCase();
-        
-        let filteredBloggers = mockBloggers.filter(blogger => {
-          if (platformFilter && blogger.platform !== platformFilter) return false;
-          
-          const followersK = blogger.followers / 1000;
-          if (followersK < minFollowers || followersK > maxFollowers) return false;
-          
-          if (categoryFilter && !blogger.category.toLowerCase().includes(categoryFilter)) return false;
-          
-          if (queryFilter && !(
-            blogger.name.toLowerCase().includes(queryFilter) ||
-            blogger.category.toLowerCase().includes(queryFilter)
-          )) return false;
-          
-          return true;
-        });
-        
-        // Добавляем только тех, кого еще нет в выбранных
-        filteredBloggers.forEach(blogger => {
-          if (!appState.selectedBloggers.some(b => b.id === blogger.id)) {
-            appState.selectedBloggers.push(blogger);
-          }
-        });
-        
-        document.getElementById('pickedCount').textContent = appState.selectedBloggers.length;
-        
-        // Обновляем UI
-        const cards = document.querySelectorAll('.card-blogger');
-        cards.forEach(card => {
-          const bloggerId = parseInt(card.dataset.id);
-          if (appState.selectedBloggers.some(b => b.id === bloggerId)) {
-            card.classList.add('selected');
-            const checkbox = card.querySelector('input[type="checkbox"]');
-            if (checkbox) checkbox.checked = true;
-          }
-        });
-      }
-      
-      // Шаг 1: Очистить выбранных блогеров
-      function clearSelectedBloggers() {
-        appState.selectedBloggers = [];
-        document.getElementById('pickedCount').textContent = 0;
-        
-        // Снимаем выделение со всех карточек
-        const cards = document.querySelectorAll('.card-blogger');
-        cards.forEach(card => {
-          card.classList.remove('selected');
-          const checkbox = card.querySelector('input[type="checkbox"]');
-          if (checkbox) checkbox.checked = false;
-        });
-      }
-      
-      // Шаг 2: Сохранение брифа
-      function saveBrief(e) {
-        e.preventDefault();
-        
-        const goal = document.getElementById('briefGoal').value;
-        const budget = document.getElementById('briefBudget').value;
-        const deadline = document.getElementById('briefDeadline').value;
-        
-        appState.briefData = { goal, budget, deadline };
-        
-        document.getElementById('briefSaved').textContent = '✓ Бриф сохранен';
-        
-        setTimeout(() => {
-          goToNextStep();
-        }, 1000);
-      }
-      
-      // Шаг 3: Привязка почты
-      function linkEmail() {
-        const email = document.getElementById('emailAccount').value;
-        
-        if (email && isValidEmail(email)) {
-          appState.emailLinked = true;
-          document.getElementById('emailStatus').textContent = '✓ Почта привязана';
-          
-          setTimeout(() => {
-            goToNextStep();
-          }, 1000);
-        } else {
-          document.getElementById('emailStatus').textContent = 'Введите корректный email';
-        }
-      }
-      
-      // Валидация email
-      function isValidEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
-      }
-      
-      // Шаг 4: Отправка рассылки
-      function sendOutreach() {
-        if (appState.selectedBloggers.length === 0) {
-          document.getElementById('outreachStatus').textContent = 'Сначала выберите блогеров на шаге 1';
-          return;
-        }
-        
-        appState.outreachSent = true;
-        document.getElementById('outreachStatus').textContent = '✓ Письма отправлены';
-        
-        // Имитация ответов
-        setTimeout(() => {
-          appState.responses = appState.selectedBloggers
-            .filter((_, index) => index % 2 === 0)
-            .map(blogger => ({ blogger, responded: true, status: 'interested' }));
-          
-          renderOutreachList();
-        }, 2000);
-      }
-      
-      // Шаг 4: Рендер списка рассылки
-      function renderOutreachList() {
-        const listContainer = document.getElementById('outreachList');
-        if (!listContainer) return;
-        
-        listContainer.innerHTML = '';
-        
-        appState.selectedBloggers.forEach(blogger => {
-          const response = appState.responses.find(r => r.blogger.id === blogger.id);
-          const status = response ? '✓ Ответил' : '⏳ Ожидание';
-          
-          const item = document.createElement('li');
-          item.innerHTML = `${status} - ${blogger.name} (${blogger.platform})`;
-          listContainer.appendChild(item);
-        });
-      }
-      
-      // Шаг 4: Отметить ответы вручную
-      function markResponses() {
-        alert('Функция отметки ответов');
-      }
-      
-      // Шаг 5: Подписание договора
-      function signContract() {
-        appState.contractSigned = true;
-        document.getElementById('contractStatus').textContent = '✓ Договор подписан';
-        
-        setTimeout(() => {
-          goToNextStep();
-        }, 1000);
-      }
-      
-      // Шаг 6: Резервирование средств
-      function reserveFunds() {
-        appState.paymentReserved = true;
-        document.getElementById('paymentStatus').textContent = '✓ Средства зарезервированы';
-        
-        setTimeout(() => {
-          goToNextStep();
-        }, 1000);
-      }
-      
-      // Шаг 7: Загрузка видео
-      function triggerUpload() {
-        document.getElementById('uploadInput').click();
-      }
-      
-      function handleVideoUpload(e) {
-        const file = e.target.files[0];
-        if (file) {
-          appState.videoUploaded = true;
-          document.getElementById('shootStatus').textContent = '✓ Видео загружено';
-          
-          setTimeout(() => {
-            goToNextStep();
-            }, 1000);
-        }
-      }
-      
-      // Шаг 8: Одобрение контента
-      function approveContent() {
-        const link = document.getElementById('approvalLink').value;
-        if (!link) {
-          document.getElementById('approvalStatus').textContent = 'Введите ссылку на ролик';
-          return;
-        }
-        
-        appState.approved = true;
-        document.getElementById('approvalStatus').textContent = '✓ Контент одобрен';
-        
-        setTimeout(() => {
-          goToNextStep();
-        }, 1000);
-      }
-      
-      // Шаг 8: Запрос правок
-      function requestFixes() {
-        document.getElementById('approvalStatus').textContent = '✓ Запрос правки отправлен';
-      }
-      
-      // Запуск приложения
-      initApp();
-    });
-  </script>
 </body>
 </html>

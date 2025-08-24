@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Чат с блогером — Bloggers.tools</title>
+  
+  <style>
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--surface-border);
+      overflow: hidden;
+    }
+    
+    .chat-header {
+      padding: 20px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .blogger-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .blogger-info {
+      flex: 1;
+    }
+    
+    .blogger-name {
+      margin: 0;
+      color: var(--text-on-surface);
+      font-size: 1.2em;
+      font-weight: 600;
+    }
+    
+    .blogger-status {
+      color: var(--text-muted);
+      font-size: 0.9em;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+    
+    .status-indicator.offline {
+      background: var(--text-muted);
+    }
+    
+    .chat-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      background: var(--surface);
+    }
+    
+    .message {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      position: relative;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .message-incoming {
+      align-self: flex-start;
+      background: var(--surface-2);
+      border: 1px solid var(--surface-border);
+      color: var(--text-on-surface);
+    }
+    
+    .message-outgoing {
+      align-self: flex-end;
+      background: var(--primary);
+      color: var(--primary-ink);
+    }
+    
+    .message-system {
+      align-self: center;
+      background: rgba(155, 81, 255, 0.1);
+      color: var(--accent);
+      font-size: 0.9em;
+      text-align: center;
+      max-width: 90%;
+    }
+    
+    .message-time {
+      font-size: 0.7em;
+      opacity: 0.7;
+      margin-top: 5px;
+      display: block;
+    }
+    
+    .message-content {
+      margin: 0;
+      line-height: 1.4;
+    }
+    
+    .message-file {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    
+    .chat-input {
+      padding: 20px;
+      background: var(--surface-2);
+      border-top: 1px solid var(--surface-border);
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+    
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+    }
+    
+    .chat-textarea {
+      width: 100%;
+      min-height: 50px;
+      max-height: 120px;
+      padding: 12px 50px 12px 16px;
+      border: 1px solid var(--surface-border);
+      border-radius: 25px;
+      background: var(--surface);
+      color: var(--text-on-surface);
+      resize: none;
+      font-family: inherit;
+      font-size: 1em;
+      line-height: 1.4;
+    }
+    
+    .chat-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(155, 81, 255, 0.2);
+    }
+    
+    .file-upload {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 5px;
+    }
+    
+    .file-upload:hover {
+      color: var(--accent);
+    }
+    
+    .send-button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      background: var(--primary);
+      color: var(--primary-ink);
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+    
+    .send-button:hover {
+      background: var(--primary-hover);
+    }
+    
+    .send-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 15px;
+      background: var(--surface-2);
+      border-radius: 18px;
+      align-self: flex-start;
+      animation: pulse 1.5s infinite;
+    }
+    
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      animation: typing 1.4s infinite;
+    }
+    
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    .empty-chat {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 40px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .empty-icon {
+      font-size: 3em;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <!-- Шапка чата -->
+    <div class="chat-header">
+      <img src="https://via.placeholder.com/150" alt="Аватар блогера" class="blogger-avatar">
+      <div class="blogger-info">
+        <h3 class="blogger-name">Иван Петров</h3>
+        <div class="blogger-status">
+          <span class="status-indicator"></span>
+          <span>В сети · @ivan_tech_review</span>
+        </div>
+      </div>
+      <div class="chat-actions">
+        <button class="btn-ghost" title="Информация о проекте">📋</button>
+        <button class="btn-ghost" title="Прикрепить файл">📎</button>
+        <button class="btn-ghost" title="Настройки чата">⚙️</button>
+      </div>
+    </div>
+    
+    <!-- Область сообщений -->
+    <div class="chat-messages" id="chatMessages">
+      <div class="message message-system">
+        Чат начат · Сегодня в 14:30
+      </div>
+      
+      <div class="message message-incoming">
+        <p class="message-content">Привет! Спасибо за интерес к collaboration. Расскажите подробнее о вашем проекте?</p>
+        <span class="message-time">14:31</span>
+      </div>
+      
+      <div class="message message-outgoing">
+        <p class="message-content">Добрый день! Мы хотим сделать интеграцию нового смартфона в вашем обзоре. Бюджет $1500</p>
+        <span class="message-time">14:32</span>
+      </div>
+      
+      <div class="message message-incoming">
+        <p class="message-content">Отлично! Можете прислать бриф и требования к интеграции?</p>
+        <span class="message-time">14:33</span>
+        <div class="message-file">
+          <span>📄</span>
+          <span>Медиакит_Иван_Петров.pdf</span>
+        </div>
+      </div>
+      
+      <div class="message message-outgoing">
+        <p class="message-content">Конечно! Отправляю бриф и гайдлайн</p>
+        <span class="message-time">14:34</span>
+        <div class="message-file">
+          <span>📄</span>
+          <span>Бриф_TechBrand.docx</span>
+        </div>
+        <div class="message-file">
+          <span>📄</span>
+          <span>Гайдлайн_интеграции.pdf</span>
+        </div>
+      </div>
+      
+      <div class="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <span>Иван печатает...</span>
+      </div>
+    </div>
+    
+    <!-- Поле ввода -->
+    <div class="chat-input">
+      <div class="input-wrapper">
+        <textarea 
+          class="chat-textarea" 
+          placeholder="Введите сообщение..." 
+          rows="1"
+          id="messageInput"
+        ></textarea>
+        <button class="file-upload" title="Прикрепить файл">📎</button>
+      </div>
+      <button class="send-button" id="sendButton" disabled>Отправить</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const messageInput = document.getElementById('messageInput');
+      const sendButton = document.getElementById('sendButton');
+      const chatMessages = document.getElementById('chatMessages');
+      
+      // Авто-размер textarea
+      messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        sendButton.disabled = this.value.trim() === '';
+      });
+      
+      // Отправка сообщения по Enter (без Shift)
+      messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          if (!sendButton.disabled) {
+            sendMessage();
+          }
+        }
+      });
+      
+      // Отправка сообщения по клику
+      sendButton.addEventListener('click', sendMessage);
+      
+      function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+        
+        // Добавляем сообщение в чат
+        addMessage(message, 'outgoing');
+        
+        // Очищаем поле ввода
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        sendButton.disabled = true;
+        
+        // Прокручиваем вниз
+        scrollToBottom();
+        
+        // Имитация ответа (через 2-5 секунд)
+        setTimeout(() => {
+          // Убираем индикатор набора
+          const typingIndicator = document.querySelector('.typing-indicator');
+          if (typingIndicator) {
+            typingIndicator.remove();
+          }
+          
+          // Добавляем ответ
+          const responses = [
+            "Понятно, спасибо за информацию!",
+            "Можете рассказать подробнее о продукте?",
+            "Какой срок реализации проекта?",
+            "Есть ли конкретные пожелания по интеграции?",
+            "Отлично! Давайте обсудим детали."
+          ];
+          
+          const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+          addMessage(randomResponse, 'incoming');
+          
+          // Показываем индикатор набора снова
+          showTypingIndicator();
+          
+        }, 2000 + Math.random() * 3000);
+      }
+      
+      function addMessage(text, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message message-${type}`;
+        
+        const time = new Date().toLocaleTimeString('ru-RU', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        });
+        
+        messageDiv.innerHTML = `
+          <p class="message-content">${text}</p>
+          <span class="message-time">${time}</span>
+        `;
+        
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+      }
+      
+      function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+        typingDiv.innerHTML = `
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <span>Иван печатает...</span>
+        `;
+        
+        chatMessages.appendChild(typingDiv);
+        scrollToBottom();
+      }
+      
+      function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+      
+      // Прокрутка вниз при загрузке
+      scrollToBottom();
+      
+      // Имитация набора сообщения при загрузке
+      setTimeout(showTypingIndicator, 1000);
+    });
+  </script>
+</body>
+</html>

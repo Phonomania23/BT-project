@@ -1,161 +1,158 @@
-/* =========  DESIGN TOKENS (из скриншота) ========= */
+/* =====================  BRAND TOKENS  ===================== */
 :root{
-  /* База */
-  --bg-body: #0f1012;           /* тёмный фон страницы */
-  --surface: #f5f6f7;           /* светлая «карточка»/панель */
-  --surface-2: #ffffff;
-  --text: #eef1f3;              /* основной текст на тёмном фоне */
+  /* Фон/поверхности */
+  --bg-body: #0f1012;
+  --surface: #ffffff;
+  --surface-2: #f5f6f7;
+
+  /* Границы */
+  --surface-border: #e4e7ec; /* добавлена для согласованности со deal.css */
+  --border: #262a2f;
+  --border-dark: #262a2f;
+  --border-light: #e4e7ec;
+
+  /* Текст */
+  --text: #eef1f3;
   --text-muted: #a3a8b0;
-  --text-on-surface: #121417;   /* текст на светлой карточке */
-  --border: #262a2f;            /* бордеры на тёмном */
-  --surface-border: #e4e7ec;    /* бордеры на светлом */
+  --text-on-surface: #121417;
 
-  /* Акценты (из логотипа/кнопок) */
-  --primary: #c7ff1a;           /* лаймовый (кнопка «Продолжить» на скрине) */
-  --primary-hover: #b2ea15;
-  --primary-active: #99cf12;
-  --primary-ink: #0e0f11;       /* текст на primary */
+  /* Брендовые акценты */
+  --primary: #c7ff1a;
+  --primary-700: #b2ea15;
+  --primary-800: #99cf12;
+  --primary-ink: #0e0f11;
 
-  --accent: #9b51ff;            /* фиолетовый (кнопка Pro) */
-  --accent-hover: #8a3fff;
-  --accent-active: #782dff;
-  --accent-ink: #ffffff;
+  --accent: #9b51ff;
+  --accent-700: #8940ff;
+  --accent-800: #6f2df9;
 
-  --link: #61d1ff;              /* ссылки в тексте на тёмном */
+  --link: #61d1ff;
 
-  /* Формы/радиусы/анимации */
+  /* Радиусы/тени/фокус */
   --radius: 12px;
   --radius-sm: 8px;
   --shadow-1: 0 8px 24px rgba(0,0,0,.28);
   --shadow-2: 0 2px 8px rgba(0,0,0,.10);
-  --focus: 0 0 0 3px rgba(199,255,26,.35);
+  --focus: 0 0 0 3px rgba(155,81,255,.35);
+
+  /* Header variables */
+  --header-h: 64px;
 }
 
-/* =========  БАЗА/ТИПОГРАФИКА ========= */
-*{ box-sizing:border-box }
-html,body{ height:100% }
+@media (max-width: 640px) {
+  :root { --header-h: 56px; }
+}
+
+/* =====================  БАЗА  ===================== */
+*{box-sizing:border-box}
+html,body{height:100%}
 body{
   margin:0;
   background:var(--bg-body);
   color:var(--text);
-  font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
-h1,h2,h3{ color:#fff; margin:0 0 .6rem }
-h1{ font-size: clamp(22px, 3vw, 28px) }
-h2{ font-size: clamp(18px, 2.4vw, 22px) }
-p{ margin:.4rem 0 .8rem }
-a{
-  color:var(--link);
-  text-decoration:none;
-}
-a:hover{ text-decoration:underline }
+h1,h2,h3{color:#fff;margin:0 0 .6rem}
+h1{font-size:clamp(22px,3vw,28px)}
+h2{font-size:clamp(18px,2.4vw,22px)}
+p{margin:.4rem 0 .8rem}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.muted{color:var(--text-muted)}
+.hidden{display:none !important}
 
-/* =========  КНОПКИ (совместимо с .btn) ========= */
-.button,.btn{
-  display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  padding:10px 16px;
-  border-radius: var(--radius);
-  border:1px solid transparent;
-  background: var(--primary);
-  color: var(--primary-ink);
-  font-weight: 600;
-  cursor:pointer;
-  transition: background .15s ease, transform .02s ease, border-color .15s ease, color .15s ease;
-  box-shadow: var(--shadow-2);
-}
-.button:hover,.btn:hover{ background: var(--primary-hover); }
-.button:active,.btn:active{ background: var(--primary-active); transform: translateY(1px); }
-.button:focus-visible,.btn:focus-visible{ outline:none; box-shadow: var(--focus); }
-
-/* Вторичная — теперь ФИОЛЕТОВАЯ заливка (как на скриншоте) */
-.btn-secondary{
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-ink);
-}
-.btn-secondary:hover{
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
-}
-.btn-secondary:active{
-  background: var(--accent-active);
-  border-color: var(--accent-active);
-}
-.btn-secondary:focus-visible{
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(155,81,255,.35);
-}
-
-/* Признаки опасных действий */
-.btn-danger{
-  background:#ff4141; color:#fff; border-color:#ff4141;
-}
-.btn-danger:hover{ background:#e33939 }
-
-/* Состояния */
-.btn:disabled, .button:disabled{ opacity:.55; cursor:not-allowed }
-
-/* =========  ФОРМЫ ========= */
-input,select,textarea{
-  width:100%;
-  padding:10px 12px;
-  border:1px solid var(--surface-border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text-on-surface);
-}
-input::placeholder,textarea::placeholder{ color:#8c9197 }
-input:focus,select:focus,textarea:focus{
-  outline:none; border-color: var(--accent); box-shadow: var(--focus);
-}
-
-/* =========  КАРТОЧКИ/ТЕКСТ НА СВЕТЛОМ ========= */
+/* =====================  КАРТОЧКИ  ===================== */
 .card{
-  background: var(--surface);
-  color: var(--text-on-surface);
+  background:var(--surface);
+  color:var(--text-on-surface);
   border:1px solid var(--surface-border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-2);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-2);
 }
-.card h1,.card h2,.card h3{ color:#0e0f11 }
+.card h1,.card h2,.card h3{color:#0e0f11}
 
-/* =========  МЕЛОЧИ ========= */
-.muted{ color: var(--text-muted) }
+/* =====================  КНОПКИ  ===================== */
+.btn,.button{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px 16px;border-radius:var(--radius);
+  border:1px solid transparent;cursor:pointer;
+  background:var(--primary);color:var(--primary-ink);font-weight:700;
+  transition:background .15s ease,transform .02s ease,box-shadow .15s ease,border-color .15s ease;
+  box-shadow:var(--shadow-2);
+}
+.btn:hover{background:var(--primary-700)}
+.btn:active{background:var(--primary-800);transform:translateY(1px)}
+.btn:focus-visible{outline:none;box-shadow:var(--focus)}
+.btn-secondary{
+  background:transparent;color:var(--primary);border-color:var(--primary);
+}
+.btn-secondary:hover{background:rgba(199,255,26,.12)}
+.btn-accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-accent:hover{background:var(--accent-700)}
+.btn-accent:active{background:var(--accent-800)}
+.btn-ghost{background:transparent;border-color:var(--border-dark);color:#fff}
+.btn-ghost:hover{border-color:#3a3f47;background:#17191d}
+.btn-danger{background:#ff4141;color:#fff;border-color:#ff4141}
+.btn-danger:hover{background:#e33939}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn-sm{padding:6px 10px;border-radius:10px}
+.btn-lg{padding:12px 18px}
+
+/* =====================  ФОРМЫ  ===================== */
+input,select,textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--surface-border);
+  border-radius:var(--radius-sm);background:var(--surface);color:var(--text-on-surface);
+}
+input::placeholder,textarea::placeholder{color:#8c9197}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:var(--focus)}
+
+/* =====================  БАДЖИ/ТЕГИ  ===================== */
 .badge{
-  display:inline-block; padding:2px 8px; border-radius:999px;
-  border:1px solid rgba(199,255,26,.55);
-  color:#0e0f11; background: rgba(199,255,26,.22);
-  font-size:.82rem; font-weight:600;
+  display:inline-block;padding:2px 8px;border-radius:999px;
+  border:1px solid rgba(155,81,255,.45);background:rgba(155,81,255,.12);color:#6b50b9;
+  font-size:.82rem;font-weight:600
 }
-.row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+.tag{
+  display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border-radius:999px;
+  background:#202329;color:#dfe3ea;border:1px solid #2b2f36
+}
 
-/* =========  ПРОГРЕСС/СТЕППЕР ========= */
-.steps{ display:flex; gap:8px; flex-wrap:wrap; margin:0; padding:0; list-style:none }
+/* =====================  ХЕДЕР/ФУТЕР  ===================== */
+.site-header{
+  position:sticky;top:0;z-index:20;background:#0d0e11;border-bottom:1px solid #1c1f24;
+  height:var(--header-h);
+  display:flex;align-items:center;
+}
+.site-header .container{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.site-header .brand{display:flex;align-items:center;gap:10px;padding:0}
+.site-header .brand img{height:28px;width:auto;display:block}
+.site-header .brand a{color:#fff;text-decoration:none}
+.site-header nav a{color:#cfd4db;margin-right:14px}
+.site-header nav a:hover{color:#fff}
+
+.site-footer{border-top:1px solid #1c1f24;padding:16px 0;color:var(--text-muted)}
+
+/* =====================  HERO  ===================== */
+.hero{text-align:center;margin:18px auto}
+.hero .logo{width:72px;height:auto;display:block;margin:0 auto 8px}
+.hero .lead{color:#c4c8cf}
+
+/* =====================  STEPPER (для deal)  ===================== */
+.steps{display:flex;gap:8px;flex-wrap:wrap;margin:0;padding:0;list-style:none}
 .step{
-  padding:8px 12px; border:1px solid var(--border); border-radius:10px;
-  background: transparent; color:#c9cdd4; user-select:none; cursor:default;
-  transition: background .2s, border-color .2s, color .2s, opacity .2s;
+  padding:8px 12px;border:1px solid var(--border);border-radius:10px;
+  background:transparent;color:#c9cdd4;user-select:none
 }
-.step[data-active="true"]{
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-ink);
-}
-.step[data-done="true"]{
-  border-color: var(--accent);
-  color: #e9ddff;
-}
-.step[data-disabled="true"]{ opacity:.5 }
+.step[data-active="true"]{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.step[data-done="true"]{border-color:var(--accent);color:#e9ddff}
+.step[data-disabled="true"]{opacity:.5}
 
-/* Полупрозрачная блокировка будущих этапов (из deal.html) */
-.locked{
-  position:relative; opacity:.6; pointer-events:none;
-}
+/* Блокировка будущих этапов (на карточках) */
+.locked{position:relative;opacity:.6;pointer-events:none}
 .locked::after{
-  content:"Завершите предыдущий этап";
-  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  background:rgba(245,246,247,.55);
-  color:#0e0f11; font-weight:700; border-radius: var(--radius);
+  content:"Завершите предыдущий этап";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(245,246,247,.55);color:#0e0f11;font-weight:700;border-radius:var(--radius)
 }

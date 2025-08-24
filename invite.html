@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Принять приглашение — Bloggers.tools</title>
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/layout.css">
+</head>
+<body>
+<style>
+  /* EMERGENCY FIX FOR HEADER */
+  body {
+    padding-top: 84px !important;
+  }
+  
+  main.container,
+  .deal-main {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+  
+  @media (max-width: 640px) {
+    body {
+      padding-top: 76px !important;
+    }
+  }
+</style>
+  <div data-include="/components/header.html"></div>
+  <main class="container">
+    <h1>Принять приглашение</h1>
+    <section class="card" style="padding:12px">
+      <div class="field">
+        <label>Имя</label>
+        <input id="name" placeholder="Имя (необязательно)">
+      </div>
+      <div class="field">
+        <label>E-mail (если хотите другой)</label>
+        <input id="email" type="email" placeholder="email (необязательно)">
+      </div>
+      <div class="field">
+        <label>Пароль (если аккаунта ещё нет)</label>
+        <input id="password" type="password" placeholder="минимум 6 символов">
+      </div>
+      <button id="accept" class="btn">Принять</button>
+      <div id="status" class="muted" style="margin-top:6px"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { auth } from '/js/auth.js';
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+    if (!token) document.getElementById('status').textContent = 'Нет токена приглашения.';
+
+    accept.onclick = async () => {
+      const res = await fetch('/api/invitations/accept', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ token, name: name.value, email: email.value, password: password.value })
+      });
+      const data = await res.json();
+      if (res.ok){
+        auth.accessToken = data.accessToken;
+        auth.user = data.user;
+        localStorage.setItem('bt.user', JSON.stringify(data.user));
+        status.textContent = 'Успех. Перехожу…';
+        setTimeout(()=> location.href = '/access.html', 600);
+      } else {
+        status.textContent = data.error || 'Ошибка';
+      }
+    };
+  </script>
+</body>
+</html>

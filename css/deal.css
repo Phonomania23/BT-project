@@ -1,123 +1,85 @@
-/* =========================
-   DEAL (воронка сделки)
-   ========================= */
+/* /css/deal.css */
 
-/* --- Макет: сайдбар + контент --- */
-.deal-wrap{
-  display:grid;
-  grid-template-columns:260px 1fr;
-  gap:16px;
-}
-@media (max-width: 920px){
-  .deal-wrap{ grid-template-columns:1fr; }
-}
+/* Сайдбар-воронка */
+.deal-wrap{ display:grid; grid-template-columns: 260px 1fr; gap:16px }
+@media (max-width: 920px){ .deal-wrap{ grid-template-columns: 1fr } }
 
-/* --- Сайдбар-воронка --- */
 .deal-sidebar{
-  position:sticky; top:72px; align-self:start;
+  position: sticky;
+  top: calc(var(--header-h,64px) + 12px);
+  align-self:start;
   padding:12px;
-  background: var(--surface);
   border:1px solid var(--surface-border);
+  background: var(--surface-2);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-2);
 }
-.steps-vertical{
-  display:flex; flex-direction:column; gap:8px;
-}
+.steps-vertical{ display:flex; flex-direction:column; gap:8px }
 .steps-vertical a{
-  display:block;
-  padding:10px 12px;
-  border:1px solid var(--surface-border);
-  border-radius:10px;
-  background:#fff;
-  color:var(--text-on-surface);
-  text-decoration:none;
-  transition: background .15s, border-color .15s, color .15s;
-}
-.steps-vertical a:hover{
-  border-color: var(--accent);
+  padding:10px 12px; border-radius:10px; border:1px solid var(--surface-border);
+  color:var(--text-on-surface); background:#fff; text-decoration:none;
 }
 .steps-vertical a[aria-current="step"]{
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-ink);
-  font-weight:700;
+  background: var(--primary); border-color:var(--primary); color:var(--primary-ink); font-weight:700;
 }
-.steps-vertical a[disabled]{
-  pointer-events:none; opacity:.5;
-}
+.steps-vertical a[disabled]{ pointer-events:none; opacity:.5 }
 
-/* --- Верхние табы (дублируют этапы) --- */
-.deal-tabs{
-  display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;
-}
+/* Верхние табы */
+.deal-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px }
 .deal-tabs button{
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:transparent;
-  color:#c9cdd4;
-  cursor:pointer;
-  transition: background .15s, border-color .15s, color .15s;
+  padding:8px 12px; border-radius:999px; border:1px solid var(--border);
+  background: transparent; color:#c9cdd4; cursor:pointer;
 }
-.deal-tabs button:hover{
-  border-color: var(--accent); color:#fff;
-}
-.deal-tabs button.is-active{
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-ink);
-}
+.deal-tabs button.is-active{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink) }
 
-/* --- Нижняя навигация --- */
+/* Хост шага */
+#stepHost.card{ padding:16px; }
+
+/* Список карточек */
+.cards-list{ list-style:none; margin:0; padding:0; display:grid; gap:12px;
+  grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); }
+
+/* Карточка из cards.js */
+.card-blogger{
+  background:#fff; border:1px solid var(--surface-border); border-radius:14px; padding:12px; color:#0e0f11;
+  display:grid; grid-template-columns:56px 1fr; gap:12px;
+}
+.card-blogger .avatar{ width:56px; height:56px; border-radius:50%; background:#eee; display:block }
+.card-blogger .name{ font-weight:700 }
+.card-blogger .meta{ color:#5b5f66; font-size:.9rem }
+.card-blogger .actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px }
+.card-blogger .note{ margin-top:8px }
+
+/* Карточка из filters.js (на случай фолбэка) */
+.blogger-card{
+  background:#fff; border:1px solid var(--surface-border); border-radius:14px; padding:12px; color:#0e0f11;
+}
+.blogger-card .blogger-name{ font-weight:700; color:#0e0f11 }
+.blogger-card .blogger-stats{ color:#5b5f66; font-size:.9rem; margin-top:2px }
+.blogger-card .blogger-price{ color:#0e0f11; margin-top:2px }
+.blogger-card.selected{ outline:2px solid var(--primary); outline-offset:2px }
+
+/* Нижняя панель */
 .deal-footer{ margin-top:12px }
 
-/* =========================
-   ФИЛЬТР-БАР (как у Hypetrain)
-   ========================= */
+/* ========= Фильтр-бар в стиле Hypetrain ========= */
 .filterbar{
   display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 10px;
-  background: #f8f9fa;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #dee2e6;
 }
 .filterbar .chip{
   display:flex; align-items:center; gap:6px;
-  padding:8px 10px;
-  border:1px solid var(--surface-border);
-  border-radius:999px;
-  background:#fff;
-  color:#121417;
-  box-shadow: 0 1px 0 rgba(16,24,40,0.04);
+  padding:8px 10px; border:1px solid var(--surface-border);
+  border-radius:999px; background:#fff; color:#121417;
 }
-.filterbar .chip label{
-  font-weight:600; font-size:.92rem; color:#121417;
-  white-space: nowrap;
+.filterbar .chip label{ font-weight:600; font-size:.92rem; color:#121417 }
+.filterbar .chip input, .filterbar .chip select{
+  border:1px solid #e5e7eb; border-radius:8px; padding:6px 8px; background:#fff; color:#121417;
 }
-.filterbar .chip input,
-.filterbar .chip select{
-  border:1px solid #e5e7eb;
-  border-radius:8px;
-  padding:6px 8px;
-  background:#fff;
-  color:#121417;
-}
-.filterbar .chip .muted{ color:#6b7280 }
 
-/* Активные чипы (под полосой фильтров) */
-.chips{ 
-  display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 10px;
-  min-height: 30px;
-}
+/* Активные чипы (с крестиком) */
+.chips{ display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 10px }
 .chips .tag{
-  display:inline-flex; align-items:center; gap:6px;
-  padding:6px 12px;
-  background:#e2e8f0;
-  color:#4a5568;
-  border-radius:999px;
-  border:1px solid #e5e7eb;
-  font-size:.92rem;
+  display:inline-flex; align-items:center; gap:6px; padding:6px 10px;
+  background: #f1f3f5; color:#111; border-radius:999px; border:1px solid #e5e7eb;
 }
 .chips .tag button{
   border:none; background:transparent; cursor:pointer; color:#666; padding:0 2px;
@@ -126,288 +88,6 @@
 /* Тумблеры */
 .switch{ display:inline-flex; align-items:center; gap:6px }
 .switch > input{ transform: translateY(1px) }
+/* blogger-card как грид-айтем */
+.cards-list blogger-card { display:block; }
 
-/* =========================
-   КАРТОЧКИ БЛОГЕРОВ (результаты)
-   ========================= */
-.cards-list{
-  list-style:none; margin:0; padding:0;
-  display:grid; gap:12px;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-}
-.card-blogger{
-  background:#fff;
-  border:1px solid var(--surface-border);
-  border-radius:14px;
-  padding:12px;
-  color:#0e0f11;
-  display:grid; grid-template-columns:56px 1fr; gap:12px;
-  box-shadow: var(--shadow-2);
-  transition: box-shadow .15s, transform .02s;
-}
-.card-blogger:hover{
-  box-shadow: 0 8px 24px rgba(0,0,0,.06);
-}
-.card-blogger .avatar{
-  width:56px; height:56px; border-radius:50%;
-  background:#eee; display:block; object-fit:cover;
-}
-.card-blogger .avatar[src=""],
-.card-blogger .avatar:not([src]) {
-  background: #f1f3f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-  font-size: 12px;
-}
-.card-blogger .avatar[src=""]::before,
-.card-blogger .avatar:not([src])::before {
-  content: "No image";
-}
-.card-blogger .name{ font-weight:700 }
-.card-blogger .meta{ 
-  color:#5b5f66; 
-  font-size:.9rem; 
-  display:flex; 
-  flex-wrap:wrap; 
-  gap:6px; 
-  align-items:center;
-  margin-bottom: 4px;
-}
-.card-blogger .actions{ 
-  display:flex; 
-  gap:8px; 
-  flex-wrap:wrap; 
-  margin-top:6px;
-}
-.card-blogger .note{ margin-top:8px }
-.card-blogger .badge{
-  display:inline-block; 
-  padding:2px 8px; 
-  border-radius:999px;
-  border:1px solid #dedede; 
-  background:#f6f7f8; 
-  color:#222; 
-  font-size:.82rem; 
-  font-weight:600;
-}
-.select-radio{ 
-  display:inline-flex; 
-  align-items:center; 
-  gap:8px;
-  margin-right: 8px;
-}
-
-/* AI Search Bar */
-.aibar.card {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-}
-.aibar .field {
-  margin-bottom: 0;
-}
-.aibar code {
-  background: #e9ecef;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
-  color: #495057;
-}
-
-/* =========================
-   ШАГИ/СТАТУСЫ (резерв)
-   ========================= */
-.steps{ display:flex; gap:8px; flex-wrap:wrap; margin:0; padding:0; list-style:none }
-.step{
-  padding:8px 12px; border:1px solid var(--border); border-radius:10px;
-  background: transparent; color:#c9cdd4; user-select:none; cursor:default;
-  transition: background .2s, border-color .2s, color .2s, opacity .2s;
-}
-.step[data-active="true"]{
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-ink);
-}
-.step[data-done="true"]{
-  border-color: var(--accent);
-  color: #e9ddff;
-}
-.step[data-disabled="true"]{ opacity:.5 }
-
-/* Полупрозрачная блокировка будущих этапов */
-.locked{ position:relative; opacity:.6; pointer-events:none; }
-.locked::after{
-  content:"Завершите предыдущий этап";
-  position:absolute; inset:0;
-  display:flex; align-items:center; justify-content:center;
-  background: rgba(245,246,247,.55);
-  color:#0e0f11; font-weight:700; border-radius: var(--radius);
-}
-
-/* =========================
-   РЕЗЕРВНЫЙ UI, ЕСЛИ ШАБЛОН НЕ ПРИШЁЛ
-   ========================= */
-body.no-templates #stepHost{
-  min-height:240px;
-  display:block;
-}
-body.no-templates #stepHost:empty::before{
-  content:"Не удалось загрузить шаблон шага. Показан резервный интерфейс.";
-  display:block;
-  margin:0 0 12px;
-  padding:10px 12px;
-  background:#fff;
-  color:#121417;
-  border:1px solid var(--surface-border);
-  border-radius: var(--radius);
-}
-
-/* Контейнер fallback */
-.deal-fallback{
-  background:#fff;
-  color:#121417;
-  border:1px solid var(--surface-border);
-  border-radius: var(--radius);
-  padding:12px;
-  box-shadow: var(--shadow-2);
-}
-.deal-fallback h3{ margin:0 0 8px; color:#0e0f11 }
-.deal-fallback .fallback-note{ color:#5b5f66; margin-bottom:8px }
-
-/* Скелетон для «заглушки» */
-.skeleton{
-  display:grid; gap:8px;
-}
-.skeleton-line{
-  height:12px; border-radius:999px;
-  background: linear-gradient(90deg, #f2f3f5 25%, #eaecee 37%, #f2f3f5 63%);
-  background-size: 400% 100%;
-  animation: shimmer 1.2s ease-in-out infinite;
-}
-.skeleton-line.w40{ width:40% }
-.skeleton-line.w60{ width:60% }
-.skeleton-line.w80{ width:80% }
-.skeleton-line.w100{ width:100% }
-@keyframes shimmer{
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* Резервные кнопки в фолбэке */
-.fallback-actions{
-  display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;
-}
-.fallback-actions .btn{
-  padding:8px 12px;
-}
-
-/* =========================
-   МЕЛКИЕ УТИЛИТЫ
-   ========================= */
-.list{ 
-  list-style:none; 
-  margin:0; 
-  padding:0; 
-  display:flex; 
-  flex-direction:column; 
-  gap:10px; 
-  max-height:420px; 
-  overflow:auto;
-}
-.list li {
-  padding: 8px 12px;
-  background: #f8f9fa;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
-}
-.row{ 
-  display:flex; 
-  gap:8px; 
-  align-items:center; 
-  flex-wrap:wrap;
-  margin: 8px 0;
-}
-.muted{ 
-  color:#666;
-  font-style: italic;
-}
-.hidden{ display:none !important }
-
-/* Поля форм */
-.field {
-  margin-bottom: 12px;
-}
-.field label {
-  display: block;
-  margin-bottom: 4px;
-  font-weight: 600;
-  color: #2d3748;
-}
-.field input,
-.field select,
-.field textarea {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background: white;
-}
-.field textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-/* Сетка для форм */
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.grid .field:first-child {
-  grid-column: 1 / -1;
-}
-
-/* Небольшой «подпрыг» на актив при клике */
-.btn:active{ transform: translateY(1px); }
-
-/* Сообщения статуса */
-#briefSaved,
-#emailStatus,
-#outreachStatus,
-#contractStatus,
-#paymentStatus,
-#shootStatus,
-#approvalStatus {
-  padding: 6px 12px;
-  border-radius: 4px;
-  background: #d4edda;
-  color: #155724;
-  font-size: 14px;
-  margin-left: 12px;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-  .filterbar {
-    flex-direction: column;
-    gap: 12px;
-  }
-  .filterbar .chip {
-    flex-wrap: wrap;
-  }
-  .grid {
-    grid-template-columns: 1fr;
-  }
-  .cards-list {
-    grid-template-columns: 1fr;
-  }
-  .card-blogger {
-    grid-template-columns: 48px 1fr;
-    gap: 8px;
-  }
-  .card-blogger .avatar {
-    width: 48px;
-    height: 48px;
-  }
-}

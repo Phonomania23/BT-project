@@ -1,4 +1,4 @@
-// deal-router.js — хэш-роутинг, блокировки этапов, навигация Назад/Далее
+// /js/deal-router.js — хэш-роутинг, блокировки этапов, навигация Назад/Далее
 // Работает с /deal/index.html и модулями filters.js + cards.js
 
 /********************
@@ -198,37 +198,21 @@ function initStep(step) {
   }
 }
 
-// Шаг 1 — Подбор (упрощенная инициализация)
+// Шаг 1 — Подбор
 function initStep1() {
-  console.log("🔄 Инициализация шага 1");
-  
-  // Простая инициализация без сложных проверок
   if (typeof window.initPickStep === "function") {
-    setTimeout(() => {
-      window.initPickStep();
-      console.log("✅ initPickStep вызван");
-    }, 100);
-    return;
-  }
-
-  // Если функция не найдена, пробуем загрузить данные хотя бы
-  console.warn("initPickStep не найден, пробуем базовую инициализацию");
-  
-  const listEl = $("#resultsList");
-  if (listEl) {
-    listEl.innerHTML = `
-      <li class="muted">Загрузка блогеров...</li>
-    `;
-    
-    // Пробуем загрузить данные
-    setTimeout(() => {
-      if (listEl) {
-        listEl.innerHTML = `
-          <li class="muted">Фильтры загружены. Выберите платформу для начала работы.</li>
-        `;
+    window.initPickStep();
+  } else {
+    // лёгкий fallback на случай, если filters.js ещё не загрузился
+    const listEl = $("#resultsList");
+    if (listEl) listEl.innerHTML = `<li class="muted">Загрузка фильтров…</li>`;
+    const once = () => {
+      if (typeof window.initPickStep === "function") {
+        document.removeEventListener("filters:ready", once);
+        window.initPickStep();
       }
-      document.dispatchEvent(new CustomEvent('filters:ready'));
-    }, 500);
+    };
+    document.addEventListener("filters:ready", once);
   }
 }
 
@@ -249,9 +233,7 @@ function initStep2() {
         budget: Number(budget?.value || 0),
         deadline: deadline?.value || ""
       };
-      if (!data.goal || !data.budget || !data.deadline) {
-        return alert("Заполните все поля брифа.");
-      }
+      if (!data.goal || !data.budget || !data.deadline) return alert("Заполните все поля брифа.");
       setFunnel({ brief: { ...data, done: true } });
       const savedEl = $("#briefSaved");
       if (savedEl) {

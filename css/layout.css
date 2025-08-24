@@ -1,66 +1,32 @@
-/* Контейнер и «дыхание» */
-.container{
-  width: min(1100px, 92vw);
-  margin: 0 auto;
-  padding: clamp(12px, 2.2vw, 24px);
+/* Контейнеры и сетки */
+.container{width:min(1120px,92%);margin-inline:auto;padding:16px 0}
+.grid{display:grid;gap:16px}
+.grid-cols-2{grid-template-columns:repeat(2,1fr)}
+.grid-cols-3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:920px){
+  .grid-cols-2,.grid-cols-3{grid-template-columns:1fr}
 }
 
-/* Хедер/навигация (тёмные) */
-.site-header, header.site{
-  background:#0b0c0e;
-  border-bottom:1px solid var(--border);
-  position:sticky; top:0; z-index:50;
-}
-.site-header .container{ display:flex; align-items:center; justify-content:space-between; gap:12px }
-.site-nav a{ color:#fff; opacity:.9; padding:6px 10px; border-radius:8px }
-.site-nav a:hover{ background:#14161a }
+/* Списки */
+.list{margin:0;padding:0;list-style:none}
+.list li{padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:#14161a;color:#e2e6ed}
 
-/* Футер */
-.site-footer, footer.site{
-  background:#0b0c0e;
-  border-top:1px solid var(--border);
-  color:var(--text-muted);
-  padding: 24px 0;
-}
+/* Навигационные ссылки/меню */
+.navbar{display:flex;gap:14px}
+.navbar a{color:#cfd4db}
+.navbar a:hover{color:#fff}
 
-/* Герой/панели на главной */
-.hero{
-  text-align:center; padding: clamp(16px, 3.6vw, 32px);
-  background: var(--surface);
-  color: var(--text-on-surface);
-  border:1px solid var(--surface-border);
-  border-radius: 16px;
-  box-shadow: var(--shadow-1);
-}
-.hero .actions{ display:flex; justify-content:center; gap:12px; margin-top:12px }
-.hero .links a{ margin:0 8px }
+/* Блоки действий на hero */
+.actions{display:flex;gap:10px;justify-content:center;margin:12px 0}
+.links{display:flex;gap:12px;justify-content:center;margin-top:8px}
+.links .link{color:#a0dfff}
 
-/* Лейаут карточек */
-.grid{ display:grid; gap:16px; grid-template-columns:1fr }
-@media (min-width: 960px){
-  .grid-2{ grid-template-columns: 1fr 1fr }
-  .grid-3{ grid-template-columns: repeat(3, 1fr) }
-}
+/* Карточки-цены/планов */
+.pricing{display:grid;gap:16px;grid-template-columns:repeat(3,1fr)}
+.pricing .plan{background:#fff;border:1px solid var(--surface-border);border-radius:14px;padding:16px;color:#111}
+.pricing .plan .cta{margin-top:12px}
+@media (max-width:920px){.pricing{grid-template-columns:1fr}}
 
-/* Списки результатов/чек-листы */
-.list{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;
-  max-height: 420px; overflow:auto }
-
-/* Инпут-рядки фильтров на agency.html */
-.filters{
-  display:grid; gap:12px; align-items:end;
-  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
-}
-.filters .field{ display:flex; flex-direction:column; gap:6px }
-
-/* Прогресс-бар (если нужен сверху страниц) */
-.progress{
-  height:8px; width:100%; background:#1a1d22; border-radius:999px; overflow:hidden
-}
-.progress > i{ display:block; height:100%; width:0; background: var(--primary);
-  transition: width .3s ease }
-
-/* Мелочи для включённой тёмной темы */
-hr{ border:0; border-top:1px solid var(--border); margin:12px 0 }
-.table{ width:100%; border-collapse:collapse }
-.table th,.table td{ border:1px solid var(--surface-border); padding:8px 10px }
+/* Хлебные крошки */
+.breadcrumbs{display:flex;gap:8px;align-items:center;color:#cfd4db}
+.breadcrumbs a{color:#fff}

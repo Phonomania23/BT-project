@@ -1,290 +1,681 @@
-// deal.js — строгая последовательность этапов
-// Подбор → Бриф → Привязка почты → Рассылка → Договор/Оплата → Съёмка → Одобрение → Оплата блогеру
+/* =========  DESIGN TOKENS (из скриншота) ========= */
+:root{
+  /* База */
+  --bg-body: #0f1012;           /* тёмный фон страницы */
+  --surface: #f5f6f7;           /* светлая «карточка»/панель */
+  --surface-2: #ffffff;
+  --text: #eef1f3;              /* основной текст на тёмном фоне */
+  --text-muted: #a3a8b0;
+  --text-on-surface: #121417;   /* текст на светлой карточке */
+  --border: #262a2f;            /* бордеры на тёмном */
+  --surface-border: #e4e7ec;    /* бордеры на светлом */
 
-const OVERLAY_KEY = "dealsOverlay";
-const STAGES = [
-  { key: "select", label: "Подбор" },
-  { key: "brief", label: "Бриф" },
-  { key: "email", label: "Привязка почты" },
-  { key: "outreach", label: "Рассылка" },
-  { key: "contractPayment", label: "Договор/Оплата" },
-  { key: "shoot", label: "Съёмка" },
-  { key: "approval", label: "Одобрение" },
-  { key: "payout", label: "Оплата блогеру" },
-];
+  /* Акценты (из логотипа/кнопок) */
+  --primary: #c7ff1a;           /* лаймовый (кнопка «Продолжить» на скрине) */
+  --primary-hover: #b2ea15;
+  --primary-active: #99cf12;
+  --primary-ink: #0e0f11;       /* текст на primary */
 
-function readOverlay() {
-  try { return JSON.parse(localStorage.getItem(OVERLAY_KEY) || "{}"); } catch { return {}; }
-}
-function writeOverlay(obj) {
-  try { localStorage.setItem(OVERLAY_KEY, JSON.stringify(obj)); } catch {}
-}
+  --accent: #9b51ff;            /* фиолетовый (кнопка Pro) */
+  --accent-hover: #8a3fff;
+  --accent-active: #782dff;
+  --accent-ink: #ffffff;
 
-// Обновляет overlay конкретной сделки
-function patchDeal(baseId, patch) {
-  const all = readOverlay();
-  const cur = all[baseId] || {};
-  const next = {
-    ...cur,
-    ...patch,
-    brief: { ...(cur.brief||{}), ...(patch.brief||{}) },
-    approval: { ...(cur.approval||{}), ...(patch.approval||{}) }
-  };
-  all[baseId] = next;
-  writeOverlay(all);
-  return next;
+  --link: #61d1ff;              /* ссылки в тексте на тёмном */
+
+  /* Формы/радиусы/анимации */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-1: 0 8px 24px rgba(0,0,0,.28);
+  --shadow-2: 0 2px 8px rgba(0,0,0,.10);
+  --focus: 0 0 0 3px rgba(199,255,26,.35);
 }
 
-function stepIndex(key) { return STAGES.findIndex(s=>s.key===key) + 1; }
+/* =========  БАЗА/ТИПОГРАФИКА ========= */
+*{ box-sizing:border-box }
+html,body{ height:100% }
+body{
+  margin:0;
+  background:var(--bg-body);
+  color:var(--text);
+  font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+h1,h2,h3{ color:#fff; margin:0 0 .6rem }
+h1{ font-size: clamp(22px, 3vw, 28px) }
+h2{ font-size: clamp(18px, 2.4vw, 22px) }
+p{ margin:.4rem 0 .8rem }
+a{
+  color:var(--link);
+  text-decoration:none;
+}
+a:hover{ text-decoration:underline }
 
-(async function init(){
-  // Узнаём выбранного блогера (из ?blogger или localStorage)
-  const params = new URLSearchParams(location.search);
-  const bloggerIdFromQuery = params.get("blogger") || localStorage.getItem("selectedBloggerId") || "";
+/* =========  КНОПКИ (совместимо с .btn) ========= */
+.button,.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:10px 16px;
+  border-radius: var(--radius);
+  border:1px solid transparent;
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-weight: 600;
+  cursor:pointer;
+  transition: background .15s ease, transform .02s ease, border-color .15s ease, color .15s ease;
+  box-shadow: var(--shadow-2);
+}
+.button:hover,.btn:hover{ background: var(--primary-hover); }
+.button:active,.btn:active{ background: var(--primary-active); transform: translateY(1px); }
+.button:focus-visible,.btn:focus-visible{ outline:none; box-shadow: var(--focus); }
 
-  // Базовая сделка: берём первую из json/deals.json как шаблон (для хранения прогресса)
-  let deals = [];
-  try {
-    const res = await fetch("json/deals.json", { cache: "no-store" });
-    deals = await res.json();
-  } catch(e){ console.error(e); }
+/* Вторичная — теперь ФИОЛЕТОВАЯ заливка (как на скриншоте) */
+.btn-secondary{
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.btn-secondary:hover{
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+.btn-secondary:active{
+  background: var(--accent-active);
+  border-color: var(--accent-active);
+}
+.btn-secondary:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(155,81,255,.35);
+}
 
-  const base = deals[0] || { id: "deal_demo", title:"Сделка", brand:"Demo Brand", platform:"" };
+/* Признаки опасных действий */
+.btn-danger{
+  background:#ff4141; color:#fff; border-color:#ff4141;
+}
+.btn-danger:hover{ background:#e33939 }
 
-  // Слияние с overlay
-  const ovAll = readOverlay();
-  let current = { ...base, ...(ovAll[base.id]||{}) };
+/* Состояния */
+.btn:disabled, .button:disabled{ opacity:.55; cursor:not-allowed }
 
-  // Если из поиска пришёл блогер — сохраняем в overlay как пройденный «Подбор»
-  if (bloggerIdFromQuery && current.selectedBloggerId !== bloggerIdFromQuery) {
-    current = patchDeal(base.id, { selectedBloggerId: bloggerIdFromQuery });
+/* =========  ФОРМЫ ========= */
+input,select,textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-on-surface);
+}
+input::placeholder,textarea::placeholder{ color:#8c9197 }
+input:focus,select:focus,textarea:focus{
+  outline:none; border-color: var(--accent); box-shadow: var(--focus);
+}
+
+/* =========  КАРТОЧКИ/ТЕКСТ НА СВЕТЛОМ ========= */
+.card{
+  background: var(--surface);
+  color: var(--text-on-surface);
+  border:1px solid var(--surface-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-2);
+}
+.card h1,.card h2,.card h3{ color:#0e0f11 }
+
+/* =========  МЕЛОЧИ ========= */
+.muted{ color: var(--text-muted) }
+.badge{
+  display:inline-block; padding:2px 8px; border-radius:999px;
+  border:1px solid rgba(199,255,26,.55);
+  color:#0e0f11; background: rgba(199,255,26,.22);
+  font-size:.82rem; font-weight:600;
+}
+.row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+
+/* =========  ПРОГРЕСС/СТЕППЕР ========= */
+.steps{ display:flex; gap:8px; flex-wrap:wrap; margin:0; padding:0; list-style:none }
+.step{
+  padding:8px 12px; border:1px solid var(--border); border-radius:10px;
+  background: transparent; color:#c9cdd4; user-select:none; cursor:default;
+  transition: background .2s, border-color .2s, color .2s, opacity .2s;
+}
+.step[data-active="true"]{
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-ink);
+}
+.step[data-done="true"]{
+  border-color: var(--accent);
+  color: #e9ddff;
+}
+.step[data-disabled="true"]{ opacity:.5 }
+
+/* Полупрозрачная блокировка будущих этапов (из deal.html) */
+.locked{
+  position:relative; opacity:.6; pointer-events:none;
+}
+.locked::after{
+  content:"Завершите предыдущий этап";
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(245,246,247,.55);
+  color:#0e0f11; font-weight:700; border-radius: var(--radius);
+}
+
+/* =========  СТИЛИ ДЛЯ СДЕЛОК (DEAL) ========= */
+.deal-wrap {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  min-height: calc(100vh - 120px);
+}
+
+.deal-sidebar {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--surface-border);
+}
+
+.steps-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.steps-vertical a {
+  display: block;
+  padding: 12px 16px;
+  color: var(--text-on-surface);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.steps-vertical a:hover {
+  background: var(--surface-2);
+  border-left-color: var(--accent);
+}
+
+.steps-vertical a.step-active {
+  background: var(--surface-2);
+  border-left-color: var(--primary);
+  font-weight: 600;
+}
+
+.deal-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.deal-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.deal-tabs button {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  background: var(--surface-2);
+  color: var(--text-on-surface);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.deal-tabs button:hover {
+  background: var(--surface);
+}
+
+.deal-tabs button.tab-active {
+  background: var(--primary);
+  color: var(--primary-ink);
+}
+
+.deal-footer {
+  margin-top: auto;
+  padding: 20px 0;
+  border-top: 1px solid var(--surface-border);
+}
+
+/* Стили для фильтров */
+.filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  border: 1px solid var(--surface-border);
+  margin: 16px 0;
+}
+
+.chip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.chip label {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--text-on-surface);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.chip-filter {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(199, 255, 26, 0.15);
+  padding: 6px 12px;
+  border-radius: 16px;
+  margin: 4px;
+  font-size: 14px;
+  color: var(--primary-ink);
+  border: 1px solid var(--primary);
+}
+
+.chip-filter button {
+  background: none;
+  border: none;
+  margin-left: 6px;
+  cursor: pointer;
+  color: var(--primary-ink);
+  font-weight: bold;
+}
+
+.aibar {
+  background: linear-gradient(135deg, rgba(155, 81, 255, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%);
+  border: 1px solid var(--accent);
+}
+
+.cards-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.blogger-card {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface);
+}
+
+.blogger-card:hover {
+  box-shadow: var(--shadow-1);
+  transform: translateY(-2px);
+}
+
+.blogger-card.selected {
+  background: rgba(199, 255, 26, 0.15);
+  border-color: var(--primary);
+}
+
+/* Стили для ИИ-ассистента */
+.ai-assistant {
+  margin: 20px 0;
+  padding: 20px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  border: 1px solid var(--surface-border);
+}
+
+.ai-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.ai-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--surface-border);
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--primary);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.ai-status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.status-enabled {
+  background: rgba(76, 175, 80, 0.2);
+  color: #2e7d32;
+}
+
+.status-disabled {
+  background: rgba(244, 67, 54, 0.2);
+  color: #d32f2f;
+}
+
+.ai-suggestions {
+  margin-top: 20px;
+}
+
+.ai-score {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.score-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: conic-gradient(var(--primary) var(--score), var(--surface-border) 0);
+  margin: 0 auto 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.score-circle::before {
+  content: '';
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  background: var(--surface);
+  border-radius: 50%;
+}
+
+.score-circle span {
+  position: relative;
+  z-index: 1;
+  font-weight: bold;
+  font-size: 1.2em;
+  color: var(--text-on-surface);
+}
+
+.suggestions-list {
+  margin-bottom: 25px;
+}
+
+.suggestion-item {
+  padding: 15px;
+  margin: 10px 0;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--surface-border);
+}
+
+.suggestion-item[data-priority="high"] {
+  border-left-color: #f44336;
+}
+
+.suggestion-item[data-priority="medium"] {
+  border-left-color: #ff9800;
+}
+
+.suggestion-item[data-priority="low"] {
+  border-left-color: #4caf50;
+}
+
+.suggestion-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.priority-badge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.priority-badge.high {
+  background: rgba(244, 67, 54, 0.2);
+  color: #d32f2f;
+}
+
+.priority-badge.medium {
+  background: rgba(255, 152, 0, 0.2);
+  color: #f57c00;
+}
+
+.priority-badge.low {
+  background: rgba(76, 175, 80, 0.2);
+  color: #2e7d32;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.9em;
+  margin-top: 8px;
+}
+
+.improved-brief {
+  background: var(--surface);
+  padding: 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--surface-border);
+}
+
+.brief-preview {
+  background: var(--surface-2);
+  padding: 15px;
+  border-radius: var(--radius-sm);
+  margin: 15px 0;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.ai-loading {
+  text-align: center;
+  padding: 40px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--surface-border);
+  border-top: 3px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Модальное окно */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--surface);
+  padding: 25px;
+  border-radius: var(--radius);
+  max-width: 500px;
+  width: 90%;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Стили для статусов */
+.status-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-success { background-color: #4CAF50; }
+.status-waiting { background-color: #FFC107; }
+.status-error { background-color: #F44336; }
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .deal-wrap {
+    grid-template-columns: 1fr;
   }
-
-  // Подтянем инфо по блогеру (для карточки «Подбор»)
-  let bloggerName = "";
-  if (current.selectedBloggerId) {
-    try {
-      const res = await fetch("json/bloggers.json", { cache: "no-store" });
-      const bloggers = await res.json();
-      const b = bloggers.find(x=>x.id===current.selectedBloggerId);
-      bloggerName = b ? `${b.name} · ${b.platform} · ${b.niche||""}` : `ID: ${current.selectedBloggerId}`;
-    } catch(e){ console.error(e); }
+  
+  .deal-sidebar {
+    order: 2;
   }
-
-  // DOM
-  const stepsEl = document.getElementById("steps");
-  const titleEl = document.getElementById("dealTitle");
-  const metaEl  = document.getElementById("dealMeta");
-  const cancelBtn = document.getElementById("cancelBtn");
-
-  // Секции
-  const sec = {
-    select: document.getElementById("stage-select"),
-    brief: document.getElementById("stage-brief"),
-    email: document.getElementById("stage-email"),
-    outreach: document.getElementById("stage-outreach"),
-    contractPayment: document.getElementById("stage-contract"),
-    shoot: document.getElementById("stage-shoot"),
-    approval: document.getElementById("stage-approval"),
-    payout: document.getElementById("stage-payout"),
-  };
-
-  // Поля/кнопки
-  const selectedInfo = document.getElementById("selectedInfo");
-
-  const briefForm = document.getElementById("briefForm");
-  const briefGoal = document.getElementById("briefGoal");
-  const briefBudget = document.getElementById("briefBudget");
-  const briefDeadline = document.getElementById("briefDeadline");
-  const briefSaved = document.getElementById("briefSaved");
-
-  const emailAccount = document.getElementById("emailAccount");
-  const linkEmailBtn = document.getElementById("linkEmailBtn");
-  const emailStatus = document.getElementById("emailStatus");
-
-  const prepOutreachBtn = document.getElementById("prepOutreachBtn");
-  const sendOutreachBtn = document.getElementById("sendOutreachBtn");
-  const outreachStatus = document.getElementById("outreachStatus");
-
-  const signBtn = document.getElementById("signBtn");
-  const contractStatus = document.getElementById("contractStatus");
-  const payBtn = document.getElementById("payBtn");
-  const paymentStatus = document.getElementById("paymentStatus");
-
-  const uploadBtn = document.getElementById("uploadBtn");
-  const uploadInput = document.getElementById("uploadInput");
-  const shootStatus = document.getElementById("shootStatus");
-
-  const approvalLink = document.getElementById("approvalLink");
-  const approvalComment = document.getElementById("approvalComment");
-  const approveBtn = document.getElementById("approveBtn");
-  const requestFixBtn = document.getElementById("requestFixBtn");
-  const approvalStatus = document.getElementById("approvalStatus");
-
-  const payoutBtn = document.getElementById("payoutBtn");
-  const payoutStatus = document.getElementById("payoutStatus");
-
-  // Шапка
-  titleEl.textContent = current.title || "Сделка";
-  metaEl.textContent = `${current.brand || ""} · ${current.platform || ""} · дедлайн: ${current.dueDate || "—"}`;
-  selectedInfo.textContent = current.selectedBloggerId ? `Выбран блогер: ${bloggerName}` : "Не выбран. Вернитесь в поиск.";
-
-  // Заполнить формы из state
-  if (current.brief) {
-    briefGoal.value = current.brief.goal || "";
-    briefBudget.value = current.brief.budget ?? "";
-    briefDeadline.value = current.brief.deadline || "";
+  
+  .filterbar {
+    flex-direction: column;
   }
-  if (current.emailLinked) {
-    emailStatus.textContent = `Привязано к: ${current.emailAccount || "аккаунту"}`;
-    if (emailAccount) emailAccount.value = current.emailAccount || "";
+  
+  .chip {
+    min-width: 100%;
   }
-  if (current.outreachSent) outreachStatus.textContent = "Рассылка отправлена";
-  contractStatus.textContent = current.contractSigned ? "Договор подписан" : "Не подписан";
-  paymentStatus.textContent  = current.paid ? "Оплата проведена" : "Не оплачено";
-  if (current.uploadDone) shootStatus.textContent = "Черновик загружен. Ожидает публикации/одобрения.";
-  if (current.approval?.result) {
-    approvalStatus.textContent = current.approval.result === "approved"
-      ? "Реклама принята"
-      : `Запрошены правки: ${current.approval.comment||""}`;
-    if (current.approval.link) approvalLink.value = current.approval.link;
-    if (current.approval.comment) approvalComment.value = current.approval.comment;
+  
+  .deal-tabs {
+    flex-direction: column;
   }
-  if (current.payoutDone) payoutStatus.textContent = "Выплата произведена";
-
-  // Лента шагов
-  function renderSteps(activeIndex) {
-    stepsEl.innerHTML = "";
-    STAGES.forEach((s, i) => {
-      const idx = i + 1;
-      const li = document.createElement("li");
-      li.className = "step" + (idx === activeIndex ? " active" : idx < activeIndex ? " done" : "");
-      li.innerHTML = `<span class="dot">${idx}</span><span class="step-label">${s.label}</span>`;
-      stepsEl.appendChild(li);
-    });
+  
+  .ai-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
+}
 
-  // Правила готовности этапов
-  function computeActiveStep(state) {
-    if (!state.selectedBloggerId) return stepIndex("select");
-    if (!(state.brief && (state.brief.goal || state.brief.budget || state.brief.deadline))) return stepIndex("brief");
-    if (!state.emailLinked) return stepIndex("email");
-    if (!state.outreachSent) return stepIndex("outreach");
-    if (!(state.contractSigned && state.paid)) return stepIndex("contractPayment");
-    if (!state.uploadDone) return stepIndex("shoot");
-    if (!(state.approval && state.approval.result === "approved")) return stepIndex("approval");
-    if (!state.payoutDone) return stepIndex("payout");
-    return stepIndex("payout");
-  }
+/* Анимации */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
 
-  let activeStep = computeActiveStep(current);
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-  function lockUI(n) {
-    renderSteps(n);
-    // Блокируем все секции после активной
-    STAGES.forEach((s, i) => {
-      const idx = i+1;
-      const node = sec[s.key];
-      if (!node) return;
-      node.classList.toggle("locked", idx > n);
-      // Дополнительно скрываем «будущее»? (оставим видимым, но заблокированным)
-    });
+/* Улучшенные поля форм для сделок */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
 
-    // Кнопки доступности по локальным правилам
-    signBtn && (signBtn.disabled = n < stepIndex("contractPayment") || current.contractSigned);
-    payBtn && (payBtn.disabled = !current.contractSigned || current.paid);
-    uploadBtn && (uploadBtn.disabled = n < stepIndex("shoot") || current.uploadDone);
-    approveBtn && (approveBtn.disabled = n < stepIndex("approval"));
-    requestFixBtn && (requestFixBtn.disabled = n < stepIndex("approval"));
-    payoutBtn && (payoutBtn.disabled = n < stepIndex("payout") || current.payoutDone);
-  }
+.field label {
+  color: var(--text-on-surface);
+  font-weight: 600;
+  font-size: 14px;
+}
 
-  lockUI(activeStep);
+/* Стили для сеток в сделках */
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
 
-  // Сохранить и перерасчитать шаг
-  function persist(patch){
-    current = patchDeal(base.id, patch);
-    activeStep = computeActiveStep(current);
-    lockUI(activeStep);
-    // обновим шапку статусов
-    contractStatus.textContent = current.contractSigned ? "Договор подписан" : "Не подписан";
-    paymentStatus.textContent  = current.paid ? "Оплата проведена" : "Не оплачено";
-    if (current.uploadDone) shootStatus.textContent = "Черновик загружен. Ожидает публикации/одобрения.";
-    if (current.outreachSent) outreachStatus.textContent = "Рассылка отправлена";
-    if (current.emailLinked) emailStatus.textContent = `Привязано к: ${current.emailAccount || "аккаунту"}`;
-    if (current.approval?.result) {
-      approvalStatus.textContent = current.approval.result === "approved"
-        ? "Реклама принята"
-        : `Запрошены правки: ${current.approval.comment||""}`;
-    }
-    if (current.payoutDone) payoutStatus.textContent = "Выплата произведена";
-  }
+/* Специфические стили для этапов сделки */
+.stage-section {
+  padding: 24px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--surface-border);
+  margin-bottom: 20px;
+}
 
-  // БРИФ
-  briefForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const brief = {
-      goal: briefGoal.value.trim(),
-      budget: briefBudget.value ? Number(briefBudget.value) : "",
-      deadline: briefDeadline.value || ""
-    };
-    persist({ brief });
-    briefSaved.textContent = "Сохранено.";
-    setTimeout(() => (briefSaved.textContent = ""), 1800);
-  });
+.stage-section h2 {
+  color: var(--text-on-surface);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--surface-border);
+}
 
-  // EMAIL LINK
-  linkEmailBtn.addEventListener("click", () => {
-    const email = (emailAccount.value||"").trim();
-    if (!email) return alert("Укажите email-аккаунт.");
-    persist({ emailLinked: true, emailAccount: email });
-  });
+/* Стили для списков в сделках */
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 
-  // OUTREACH
-  prepOutreachBtn.addEventListener("click", () => {
-    alert("Список для рассылки сформирован (демо).");
-  });
-  sendOutreachBtn.addEventListener("click", () => {
-    persist({ outreachSent: true });
-    alert("Рассылка отправлена (демо).");
-  });
-
-  // CONTRACT & PAYMENT
-  signBtn.addEventListener("click", () => persist({ contractSigned: true }));
-  payBtn.addEventListener("click", () => persist({ paid: true }));
-
-  // SHOOT
-  uploadBtn.addEventListener("click", () => uploadInput.click());
-  uploadInput.addEventListener("change", () => {
-    if (!uploadInput.files || !uploadInput.files.length) return;
-    persist({ uploadDone: true });
-    alert("Видео загружено (демо).");
-  });
-
-  // APPROVAL
-  approveBtn.addEventListener("click", () => {
-    const link = (approvalLink.value||"").trim();
-    if (!link) return alert("Добавьте ссылку на опубликованный ролик.");
-    persist({ approval: { link, result: "approved", comment: (approvalComment.value||"").trim() } });
-  });
-  requestFixBtn.addEventListener("click", () => {
-    const link = (approvalLink.value||"").trim();
-    const comment = (approvalComment.value||"").trim();
-    if (!comment) return alert("Опишите, что нужно поправить.");
-    // Возвращаемся на съёмку (шаг до одобрения)
-    persist({ approval: { link, result: "needs_changes", comment }, uploadDone: false });
-    alert("Запрошены правки. Этап возвращён на «Съёмку».");
-  });
-
-  // PAYOUT
-  payoutBtn.addEventListener("click", () => persist({ payoutDone: true }));
-
-  // ОТМЕНА СДЕЛКИ
-  cancelBtn.addEventListener("click", () => {
-    if (!confirm("Отменить и очистить данные по этой сделке?")) return;
-    const all = readOverlay();
-    delete all[base.id];
-    writeOverlay(all);
-    location.reload();
-  });
-})();
+.list li {
+  padding: 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  background: var(--surface-2);
+}
