@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Сделка — Bloggers.tools</title>
+
+  <!-- Стили -->
+  <link rel="stylesheet" href="../css/base.css?v=20250901" />
+  <link rel="stylesheet" href="../css/layout.css?v=20250901" />
+  <link rel="stylesheet" href="../css/deal.css?v=20250901" />
+
+  <style>
+    /* Дополнительные стили для улучшения UI/UX */
+    .step-active {
+      background-color: #e8f4fd;
+      border-left: 4px solid #2196F3;
+      font-weight: bold;
+    }
+    
+    .tab-active {
+      background-color: #f5f5f5;
+      border-bottom: 3px solid #2196F3;
+    }
+    
+    .chip-filter {
+      display: inline-flex;
+      align-items: center;
+      background: #f0f0f0;
+      padding: 6px 12px;
+      border-radius: 16px;
+      margin: 4px;
+      font-size: 14px;
+    }
+    
+    .chip-filter button {
+      background: none;
+      border: none;
+      margin-left: 6px;
+      cursor: pointer;
+      color: #666;
+    }
+    
+    .blogger-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .blogger-card:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .blogger-card.selected {
+      background-color: #e8f4fd;
+      border-color: #2196F3;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    
+    .status-success { background-color: #4CAF50; }
+    .status-waiting { background-color: #FFC107; }
+    .status-error { background-color: #F44336; }
+
+    /* Стили для фильтров */
+    .filterbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 16px 0;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 20px;
+    }
+    
+    .chip label {
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
+      white-space: nowrap;
+    }
+    
+    .chip input, .chip select {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 14px;
+    }
+    
+    .chip input:focus, .chip select:focus {
+      outline: none;
+      border-color: #2196F3;
+      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+    }
+    
+    .cards-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 12px;
+    }
+    
+    .card-blogger {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    
+    .card-blogger .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #666;
+    }
+    
+    .card-blogger .name {
+      font-weight: 700;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    .card-blogger .meta {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    
+    .card-blogger .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #e3f2fd;
+      color: #1976d2;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-right: 6px;
+    }
+    
+    .card-blogger .actions {
+      margin-top: 8px;
+    }
+    
+    .select-radio {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+    
+    /* Стили для логотипа в шапке */
+    .header-logo {
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #333;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Шапка с логотипом для возврата на главную -->
+  <header class="header">
+    <div class="container">
+      <a href="/" class="header-logo">Bloggers.tools</a>
+    </div>
+  </header>
+
+  <div class="deal-wrap container">
+    <!-- Сайдбар-воронка -->
+    <aside class="deal-sidebar" aria-label="Этапы сделки">
+      <nav id="dealNav" class="steps-vertical">
+        <a href="#/1-pick"     data-step="1">1. Подбор</a>
+        <a href="#/2-brief"    data-step="2">2. Бриф</a>
+        <a href="#/3-email"    data-step="3">3. Привязка почты</a>
+        <a href="#/4-outreach" data-step="4">4. Рассылка</a>
+        <a href="#/5-contract" data-step="5">5. Договор</a>
+        <a href="#/6-payment"  data-step="6">6. Оплата</a>
+        <a href="#/7-shoot"    data-step="7">7. Съёмка</a>
+        <a href="#/8-approval" data-step="8">8. Одобрение</a>
+        <a href="#/9-payout"   data-step="9">9. Выплата</a>
+      </nav>
+    </aside>
+
+    <!-- Контент -->
+    <main class="deal-main">
+      <!-- Верхние табы -->
+      <div id="dealTabs" class="deal-tabs">
+        <button data-step="1">Подбор</button>
+        <button data-step="2">Бриф</button>
+        <button data-step="3">Почта</button>
+        <button data-step="4">Рассылка</button>
+        <button data-step="5">Договор</button>
+        <button data-step="6">Оплата</button>
+        <button data-step="7">Съёмка</button>
+        <button data-step="8">Одобрение</button>
+        <button data-step="9">Выплата</button>
+      </div>
+
+      <!-- Хост для контента шагов -->
+      <section id="stepHost" class="card" style="padding:20px"></section>
+
+      <!-- Нижняя навигация -->
+      <footer class="deal-footer row" style="justify-content:space-between;margin-top:20px">
+        <button id="prevBtn" class="btn btn-secondary" type="button">Назад</button>
+        <div class="muted">Этап <span id="stepNow">1</span> из 9</div>
+        <button id="nextBtn" class="btn" type="button">Далее</button>
+      </footer>
+    </main>
+  </div>
+
+  <div data-include="/components/footer.html"></div>
+
+  <!-- ================== ШАБЛОНЫ ШАГОВ ================== -->
+
+  <!-- Шаг 1: Подбор -->
+  <template id="tpl-1-pick">
+    <h2 style="margin-bottom:20px">Подбор блогеров</h2>
+
+    <!-- ФИЛЬТР-БАР -->
+    <form id="filtersForm" class="filterbar" onsubmit="return false">
+      <!-- Платформа -->
+      <div class="chip">
+        <label>Платформа</label>
+        <select id="fPlatform">
+          <option value="">Все платформы</option>
+          <option>YouTube</option>
+          <option>TikTok</option>
+          <option>Instagram</option>
+          <option>Telegram</option>
+        </select>
+      </div>
+
+      <!-- Подписчики -->
+      <div class="chip">
+        <label>Подписчики (тыс.)</label>
+        <input id="followersMinK" type="number" min="0" step="1" placeholder="от" style="width:80px" />
+        <span class="muted">—</span>
+        <input id="followersMaxK" type="number" min="0" step="1" placeholder="до" style="width:80px" />
+      </div>
+
+      <!-- Рубрика -->
+      <div class="chip">
+        <label>Рубрика</label>
+        <input id="fCategory" type="text" placeholder="техника, красота…" style="width:120px" />
+      </div>
+
+      <!-- Демография -->
+      <div class="chip">
+        <label>Audience geo</label>
+        <select id="fGeo">
+          <option value="">Любая</option>
+          <option>RU</option>
+          <option>EN</option>
+          <option>ES</option>
+          <option>FR</option>
+          <option>CN</option>
+        </select>
+      </div>
+
+      <!-- ER / Views -->
+      <div class="chip">
+        <label>ER, %</label>
+        <input id="fErMin" type="number" placeholder="мин" min="0" max="100" step="0.1" style="width:80px" />
+        <span class="muted">—</span>
+        <input id="fErMax" type="number" placeholder="макс" min="1" max="100" step="0.1" style="width:80px" />
+      </div>
+
+      <!-- Цена в USD -->
+      <div class="chip">
+        <label>Цена (USD)</label>
+        <input id="fPriceMin" type="number" placeholder="от" min="0" max="10000" step="100" style="width:100px" />
+        <span class="muted">—</span>
+        <input id="fPriceMax" type="number" placeholder="до" min="1" max="10000" step="100" style="width:100px" />
+      </div>
+
+      <!-- Поиск -->
+      <div class="chip">
+        <label>Поиск</label>
+        <input id="fQuery" type="search" placeholder="имя/ниша/теги…" style="width:150px" />
+      </div>
+
+      <button id="clearFilters" class="btn btn-secondary" type="button" style="margin-left:auto">Очистить фильтры</button>
+    </form>
+
+    <!-- Активные чипы -->
+    <div id="activeChips" class="chips"></div>
+
+    <!-- Статистика + кнопки -->
+    <div class="row" style="justify-content:space-between;margin:20px 0;align-items:center">
+      <div class="muted">Результатов: <span id="resultsCount">0</span> · Выбрано: <span id="pickedCount">0</span></div>
+      <div class="row">
+        <button id="selectAll" class="btn btn-secondary" type="button">Выбрать все</button>
+        <button id="clearPicked" class="btn btn-secondary" type="button">Очистить выбор</button>
+      </div>
+    </div>
+
+    <!-- Результаты -->
+    <ul id="resultsList" class="cards-list"></ul>
+  </template>
+
+  <!-- Остальные шаги остаются без изменений -->
+  <template id="tpl-2-brief">
+    <h2>Бриф</h2>
+    <form id="briefForm" class="grid">
+      <div class="field" style="grid-column:1/-1">
+        <label>Цель</label>
+        <textarea id="briefGoal" rows="3" placeholder="Что хотим достичь…" required></textarea>
+      </div>
+      <div class="field">
+        <label>Бюджет, ₽</label>
+        <input id="briefBudget" type="number" min="1" required />
+      </div>
+      <div class="field">
+        <label>Дедлайн</label>
+        <input id="briefDeadline" type="date" required />
+      </div>
+      <div class="muted" id="briefSaved"></div>
+      <button class="btn" type="submit">Сохранить бриф</button>
+    </form>
+  </template>
+
+  <template id="tpl-3-email">
+    <h2>Привязка почты</h2>
+    <div class="row">
+      <input id="emailAccount" type="email" placeholder="[email protected]" style="max-width:320px" />
+      <button id="linkEmailBtn" class="btn">Привязать</button>
+      <span id="emailStatus" class="muted"></span>
+    </div>
+  </template>
+
+  <template id="tpl-4-outreach">
+    <h2>Рассылка</h2>
+    <p class="muted">Выбранные на шаге 1 блогеры будут предложены получателями.</p>
+    <div class="row">
+      <button id="sendOutreachBtn" class="btn">Отправить письма</button>
+      <span id="outreachStatus" class="muted"></span>
+    </div>
+    <h3 style="margin-top:16px">Кто ответил?</h3>
+    <ul id="outreachList" class="list"></ul>
+    <button id="markRespondBtn" class="btn btn-secondary">Отметить ответы</button>
+  </template>
+
+  <template id="tpl-5-contract">
+    <h2>Договор</h2>
+    <div class="row">
+      <button id="signContractBtn" class="btn">Подписать</button>
+      <span id="contractStatus" class="muted"></span>
+    </div>
+  </template>
+
+  <template id="tpl-6-payment">
+    <h2>Оплата</h2>
+    <div class="row">
+      <button id="reserveFundsBtn" class="btn">Зарезервировать средства</button>
+      <span id="paymentStatus" class="muted"></span>
+    </div>
+  </template>
+
+  <template id="tpl-7-shoot">
+    <h2>Съёмка черновика</h2>
+    <div class="row">
+      <button id="uploadBtn" class="btn">Загрузить видео</button>
+      <input id="uploadInput" type="file" accept="video/*" hidden />
+      <span id="shootStatus" class="muted"></span>
+    </div>
+  </template>
+
+  <template id="tpl-8-approval">
+    <h2>Одобрение</h2>
+    <div class="field">
+      <label>Ссылка на ролик</label>
+      <input id="approvalLink" type="url" placeholder="https://"/>
+    </div>
+    <div class="field">
+      <label>Комментарий</label>
+      <textarea id="approvalComment" rows="2" placeholder="Необязательно"></textarea>
+    </div>
+    <div class="row">
+      <button id="approveBtn" class="btn">Принять</button>
+      <button id="requestFixBtn" class="btn btn-secondary">Запросить правки</button>
+      <span id="approvalStatus" class="muted"></span>
+    </div>
+  </template>
+
+  <template id="tpl-9-payout">
+    <h2>Выплата блогеру</h2>
+    <div id="payoutInfo" class="muted">Будет проведена автоматически после «Принять».</div>
+  </template>
+
+  <script>
+    // Основная логика приложения
+    document.addEventListener('DOMContentLoaded', function() {
+      // Текущее состояние приложения
+      const appState = {
+        currentStep: 1,
+        selectedBloggers: [],
+        briefData: null,
+        emailLinked: false,
+        outreachSent: false,
+        responses: [],
+        contractSigned: false,
+        paymentReserved: false,
+        videoUploaded: false,
+        approved: false
+      };
+      
+      // Данные блогеров с дополнительными полями для фильтрации
+      const mockBloggers = [
+        { id: 1, name: "Иван Петров", platform: "YouTube", followers: 125000, er: 4.5, category: "техника", price: 2500, email: "ivan@example.com", geo: "RU" },
+        { id: 2, name: "Анна Сидорова", platform: "Instagram", followers: 87000, er: 7.2, category: "красота", price: 1800, email: "anna@example.com", geo: "RU" },
+        { id: 3, name: "Сергей Козлов", platform: "YouTube", followers: 356000, er: 3.8, category: "игры", price: 4200, email: "sergey@example.com", geo: "RU" },
+        { id: 4, name: "Мария Иванова", platform: "TikTok", followers: 210000, er: 8.1, category: "мода", price: 1900, email: "maria@example.com", geo: "EN" },
+        { id: 5, name: "Дмитрий Смирнов", platform: "Telegram", followers: 45000, er: 5.5, category: "новости", price: 1200, email: "dmitry@example.com", geo: "RU" },
+        { id: 6, name: "Ольга Кузнецова", platform: "YouTube", followers: 98000, er: 6.2, category: "кулинария", price: 1600, email: "olga@example.com", geo: "RU" },
+        { id: 7, name: "Алексей Попов", platform: "TikTok", followers: 320000, er: 5.8, category: "юмор", price: 2800, email: "alex@example.com", geo: "EN" },
+        { id: 8, name: "Елена Васнецова", platform: "Instagram", followers: 145000, er: 6.9, category: "здоровье", price: 2200, email: "elena@example.com", geo: "ES" },
+        { id: 9, name: "Карлос Санчес", platform: "YouTube", followers: 89000, er: 9.2, category: "путешествия", price: 1900, email: "carlos@example.com", geo: "ES" },
+        { id: 10, name: "Пьер Дюпон", platform: "Instagram", followers: 112000, er: 8.7, category: "мода", price: 2100, email: "pierre@example.com", geo: "FR" },
+        { id: 11, name: "Ли Вей", platform: "TikTok", followers: 480000, er: 7.8, category: "техника", price: 3500, email: "li@example.com", geo: "CN" },
+        { id: 12, name: "Чжан Мин", platform: "YouTube", followers: 125000, er: 6.5, category: "образование", price: 1800, email: "zhang@example.com", geo: "CN" }
+      ];
+      
+      // Инициализация приложения
+      function initApp() {
+        setupRouter();
+        setupEventListeners();
+        renderStep(1);
+        updateNavigation();
+      }
+      
+      // Настройка маршрутизации
+      function setupRouter() {
+        window.addEventListener('hashchange', handleHashChange);
+        handleHashChange();
+      }
+      
+      // Обработчик изменения хэша
+      function handleHashChange() {
+        const hash = window.location.hash;
+        const match = hash.match(/#\/(\d)-/);
+        
+        if (match && match[1]) {
+          const step = parseInt(match[1]);
+          if (step >= 1 && step <= 9) {
+            renderStep(step);
+          }
+        }
+      }
+      
+      // Настройка обработчиков событий
+      function setupEventListeners() {
+        // Навигация по шагам
+        document.getElementById('prevBtn').addEventListener('click', goToPrevStep);
+        document.getElementById('nextBtn').addEventListener('click', goToNextStep);
+        
+        // Нажатие на шаги в сайдбаре
+        const stepLinks = document.querySelectorAll('#dealNav a');
+        stepLinks.forEach(link => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const step = parseInt(this.getAttribute('data-step'));
+            renderStep(step);
+          });
+        });
+        
+        // Нажатие на табы
+        const tabButtons = document.querySelectorAll('#dealTabs button');
+        tabButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const step = parseInt(this.getAttribute('data-step'));
+            renderStep(step);
+          });
+        });
+      }
+      
+      // Получить slug для шага
+      function getStepSlug(step) {
+        const slugs = [
+          '', 'pick', 'brief', 'email', 'outreach', 
+          'contract', 'payment', 'shoot', 'approval', 'payout'
+        ];
+        return slugs[step];
+      }
+      
+      // Рендер шага
+      function renderStep(step) {
+        appState.currentStep = step;
+        
+        // Обновляем UI
+        updateStepIndicator(step);
+        updateNavigation();
+        
+        // Загружаем контент шага
+        const template = document.getElementById(`tpl-${step}-${getStepSlug(step)}`);
+        if (template) {
+          document.getElementById('stepHost').innerHTML = template.innerHTML;
+          
+          // После рендера шага, инициализируем специфичные для шага обработчики
+          initStepSpecificHandlers(step);
+        }
+        
+        // Обновляем URL
+        window.location.hash = `#/${step}-${getStepSlug(step)}`;
+      }
+      
+      // Инициализация обработчиков для конкретного шага
+      function initStepSpecificHandlers(step) {
+        if (step === 1) {
+          initFilters();
+          renderBloggersList();
+        } else if (step === 2 && appState.briefData) {
+          document.getElementById('briefGoal').value = appState.briefData.goal || '';
+          document.getElementById('briefBudget').value = appState.briefData.budget || '';
+          document.getElementById('briefDeadline').value = appState.briefData.deadline || '';
+        } else if (step === 3 && appState.emailLinked) {
+          document.getElementById('emailStatus').textContent = '✓ Почта привязана';
+        } else if (step === 4) {
+          renderOutreachList();
+        }
+      }
+      
+      // Обновление индикатора текущего шага
+      function updateStepIndicator(step) {
+        // Обновляем сайдбар
+        const navLinks = document.querySelectorAll('#dealNav a');
+        navLinks.forEach(link => {
+          const linkStep = parseInt(link.getAttribute('data-step'));
+          if (linkStep === step) {
+            link.classList.add('step-active');
+            link.style.fontWeight = 'bold';
+          } else {
+            link.classList.remove('step-active');
+            link.style.fontWeight = 'normal';
+          }
+        });
+        
+        // Обновляем табы
+        const tabButtons = document.querySelectorAll('#dealTabs button');
+        tabButtons.forEach(button => {
+          const buttonStep = parseInt(button.getAttribute('data-step'));
+          if (buttonStep === step) {
+            button.classList.add('tab-active');
+            button.style.fontWeight = 'bold';
+          } else {
+            button.classList.remove('tab-active');
+            button.style.fontWeight = 'normal';
+          }
+        });
+        
+        // Обновляем номер текущего шага
+        document.getElementById('stepNow').textContent = step;
+      }
+      
+      // Обновление навигации
+      function updateNavigation() {
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        if (appState.currentStep === 1) {
+          prevBtn.disabled = true;
+          prevBtn.style.visibility = 'hidden';
+        } else {
+          prevBtn.disabled = false;
+          prevBtn.style.visibility = 'visible';
+        }
+        
+        if (appState.currentStep === 9) {
+          nextBtn.textContent = 'Завершить';
+        } else {
+          nextBtn.textContent = 'Далее';
+        }
+      }
+      
+      // Переход к предыдущему шагу
+      function goToPrevStep() {
+        if (appState.currentStep > 1) {
+          renderStep(appState.currentStep - 1);
+        }
+      }
+      
+      // Переход к следующему шагу
+      function goToNextStep() {
+        if (appState.currentStep < 9) {
+          renderStep(appState.currentStep + 1);
+        } else {
+          alert('Сделка успешно завершена!');
+        }
+      }
+      
+      // Шаг 1: Инициализация фильтров
+      function initFilters() {
+        const filterInputs = [
+          'fPlatform', 'followersMinK', 'followersMaxK', 'fCategory', 
+          'fGeo', 'fErMin', 'fErMax', 'fPriceMin', 'fPriceMax', 'fQuery'
+        ];
+        
+        filterInputs.forEach(id => {
+          const element = document.getElementById(id);
+          if (element) {
+            element.addEventListener('input', applyFilters);
+            element.addEventListener('change', applyFilters);
+          }
+        });
+        
+        // Кнопка очистки
+        const clearBtn = document.getElementById('clearFilters');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', clearAllFilters);
+        }
+        
+        // Кнопки выбора
+        document.getElementById('selectAll')?.addEventListener('click', selectAllFiltered);
+        document.getElementById('clearPicked')?.addEventListener('click', clearSelectedBloggers);
+      }
+      
+      // Шаг 1: Применение фильтров
+      function applyFilters() {
+        renderBloggersList();
+        updateActiveChips();
+      }
+      
+      // Шаг 1: Очистка всех фильтров
+      function clearAllFilters() {
+        const fieldsToClear = [
+          'fPlatform', 'followersMinK', 'followersMaxK', 'fCategory',
+          'fGeo', 'fErMin', 'fErMax', 'fPriceMin', 'fPriceMax', 'fQuery'
+        ];
+        
+        fieldsToClear.forEach(id => {
+          const element = document.getElementById(id);
+          if (element) element.value = '';
+        });
+        
+        applyFilters();
+      }
+      
+      // Шаг 1: Обновление активных чипов
+      function updateActiveChips() {
+        const chipsContainer = document.getElementById('activeChips');
+        chipsContainer.innerHTML = '';
+        
+        const platform = document.getElementById('fPlatform')?.value;
+        const minFollowers = document.getElementById('followersMinK')?.value;
+        const maxFollowers = document.getElementById('followersMaxK')?.value;
+        const category = document.getElementById('fCategory')?.value;
+        const geo = document.getElementById('fGeo')?.value;
+        const erMin = document.getElementById('fErMin')?.value;
+        const erMax = document.getElementById('fErMax')?.value;
+        const priceMin = document.getElementById('fPriceMin')?.value;
+        const priceMax = document.getElementById('fPriceMax')?.value;
+        const query = document.getElementById('fQuery')?.value;
+        
+        if (platform) {
+          addFilterChip('Платформа: ' + platform, () => {
+            document.getElementById('fPlatform').value = '';
+            applyFilters();
+          });
+        }
+        
+        if (minFollowers) {
+          addFilterChip('Подписчики от: ' + minFollowers + 'k', () => {
+            document.getElementById('followersMinK').value = '';
+            applyFilters();
+          });
+        }
+        
+        if (maxFollowers) {
+          addFilterChip('Подписчики до: ' + maxFollowers + 'k', () => {
+            document.getElementById('followersMaxK').value = '';
+            applyFilters();
+          });
+        }
+        
+        if (category) {
+          addFilterChip('Рубрика: ' + category, () => {
+            document.getElementById('fCategory').value = '';
+            applyFilters();
+          });
+        }
+        
+        if (geo) {
+          addFilterChip('Гео: ' + geo, () => {
+            document.getElementById('fGeo').value = '';
+            applyFilters();
+          });
+        }
+        
+        if (erMin) {
+          addFilterChip('ER от: ' + erMin + '%', () => {
+            document.getElementById('fErMin').value = '';
+            applyFilters();
+          });
+        }
+        
+        if (erMax) {
+          addFilterChip('ER до: ' + erMax + '%', () => {
+            document.getElementById('fErMax').value = '';
+            applyFilters();
+          });
+        }
+        
+        if (priceMin) {
+          addFilterChip('Цена от: ' + priceMin + '$', () => {
+            document.getElementById('fPriceMin').value = '';
+            applyFilters();
+          });
+        }
+        
+        if (priceMax) {
+          addFilterChip('Цена до: ' + priceMax + '$', () => {
+            document.getElementById('fPriceMax').value = '';
+            applyFilters();
+          });
+        }
+        
+        if (query) {
+          addFilterChip('Поиск: ' + query, () => {
+            document.getElementById('fQuery').value = '';
+            applyFilters();
+          });
+        }
+      }
+      
+      // Шаг 1: Добавление чипа фильтра
+      function addFilterChip(text, onClick) {
+        const chip = document.createElement('div');
+        chip.className = 'chip-filter';
+        chip.innerHTML = `
+          ${text}
+          <button type="button">×</button>
+        `;
+        chip.querySelector('button').addEventListener('click', onClick);
+        document.getElementById('activeChips').appendChild(chip);
+      }
+      
+      // Шаг 1: Рендер списка блогеров
+      function renderBloggersList() {
+        const listContainer = document.getElementById('resultsList');
+        if (!listContainer) return;
+        
+        listContainer.innerHTML = '';
+        
+        // Получаем значения фильтров
+        const platformFilter = document.getElementById('fPlatform').value;
+        const minFollowers = parseInt(document.getElementById('followersMinK').value) || 0;
+        const maxFollowers = parseInt(document.getElementById('followersMaxK').value) || Infinity;
+        const categoryFilter = document.getElementById('fCategory').value.toLowerCase();
+        const geoFilter = document.getElementById('fGeo').value;
+        const erMin = parseFloat(document.getElementById('fErMin').value) || 0;
+        const erMax = parseFloat(document.getElementById('fErMax').value) || Infinity;
+        const priceMin = parseInt(document.getElementById('fPriceMin').value) || 0;
+        const priceMax = parseInt(document.getElementById('fPriceMax').value) || Infinity;
+        const queryFilter = document.getElementById('fQuery').value.toLowerCase();
+        
+        // Фильтруем блогеров
+        let filteredBloggers = mockBloggers.filter(blogger => {
+          // Фильтр по платформе
+          if (platformFilter && blogger.platform !== platformFilter) {
+            return false;
+          }
+          
+          // Фильтр по подписчикам
+          const followersK = blogger.followers / 1000;
+          if (followersK < minFollowers || followersK > maxFollowers) {
+            return false;
+          }
+          
+          // Фильтр по категории
+          if (categoryFilter && !blogger.category.toLowerCase().includes(categoryFilter)) {
+            return false;
+          }
+          
+          // Фильтр по гео
+          if (geoFilter && blogger.geo !== geoFilter) {
+            return false;
+          }
+          
+          // Фильтр по ER
+          if (blogger.er < erMin || blogger.er > erMax) {
+            return false;
+          }
+          
+          // Фильтр по цене
+          if (blogger.price < priceMin || blogger.price > priceMax) {
+            return false;
+          }
+          
+          // Поисковый запрос
+          if (queryFilter && !(
+            blogger.name.toLowerCase().includes(queryFilter) ||
+            blogger.category.toLowerCase().includes(queryFilter) ||
+            blogger.platform.toLowerCase().includes(queryFilter)
+          )) {
+            return false;
+          }
+          
+          return true;
+        });
+        
+        // Обновляем счетчики
+        document.getElementById('resultsCount').textContent = filteredBloggers.length;
+        document.getElementById('pickedCount').textContent = appState.selectedBloggers.length;
+        
+        // Рендерим результаты
+        if (filteredBloggers.length === 0) {
+          listContainer.innerHTML = '<li class="muted">Ничего не найдено. Попробуйте изменить фильтры.</li>';
+          return;
+        }
+        
+        filteredBloggers.forEach(blogger => {
+          const isSelected = appState.selectedBloggers.some(b => b.id === blogger.id);
+          const card = document.createElement('li');
+          card.className = `card-blogger ${isSelected ? 'selected' : ''}`;
+          card.innerHTML = `
+            <div class="avatar">${blogger.name.charAt(0)}</div>
+            <div>
+              <div class="name">${blogger.name}</div>
+              <div class="meta">
+                <span class="badge">${blogger.platform}</span>
+                <span class="badge">${blogger.category}</span>
+                <span class="badge">${blogger.geo}</span>
+              </div>
+              <div class="meta">
+                Подписчики: ${(blogger.followers / 1000).toFixed(0)}K · 
+                ER: ${blogger.er}% · 
+                Цена: ${blogger.price}$
+              </div>
+              <div class="actions">
+                <label class="select-radio">
+                  <input type="checkbox" ${isSelected ? 'checked' : ''} 
+                         onchange="toggleBloggerSelection(${blogger.id})" />
+                  В выборку
+                </label>
+              </div>
+            </div>
+          `;
+          
+          listContainer.appendChild(card);
+        });
+      }
+      
+      // Шаг 1: Переключение выбора блогера (глобальная функция)
+      window.toggleBloggerSelection = function(bloggerId) {
+        const blogger = mockBloggers.find(b => b.id === bloggerId);
+        if (!blogger) return;
+        
+        const index = appState.selectedBloggers.findIndex(b => b.id === bloggerId);
+        
+        if (index === -1) {
+          appState.selectedBloggers.push(blogger);
+        } else {
+          appState.selectedBloggers.splice(index, 1);
+        }
+        
+        document.getElementById('pickedCount').textContent = appState.selectedBloggers.length;
+        
+        // Обновляем UI
+        const card = document.querySelector(`.card-blogger[data-id="${bloggerId}"]`);
+        if (card) {
+          card.classList.toggle('selected');
+          const checkbox = card.querySelector('input[type="checkbox"]');
+          if (checkbox) checkbox.checked = !checkbox.checked;
+        }
+      };
+      
+      // Шаг 1: Выбрать все отфильтрованные
+      function selectAllFiltered() {
+        const platformFilter = document.getElementById('fPlatform').value;
+        const minFollowers = parseInt(document.getElementById('followersMinK').value) || 0;
+        const maxFollowers = parseInt(document.getElementById('followersMaxK').value) || Infinity;
+        const categoryFilter = document.getElementById('fCategory').value.toLowerCase();
+        const queryFilter = document.getElementById('fQuery').value.toLowerCase();
+        
+        let filteredBloggers = mockBloggers.filter(blogger => {
+          if (platformFilter && blogger.platform !== platformFilter) return false;
+          
+          const followersK = blogger.followers / 1000;
+          if (followersK < minFollowers || followersK > maxFollowers) return false;
+          
+          if (categoryFilter && !blogger.category.toLowerCase().includes(categoryFilter)) return false;
+          
+          if (queryFilter && !(
+            blogger.name.toLowerCase().includes(queryFilter) ||
+            blogger.category.toLowerCase().includes(queryFilter)
+          )) return false;
+          
+          return true;
+        });
+        
+        // Добавляем только тех, кого еще нет в выбранных
+        filteredBloggers.forEach(blogger => {
+          if (!appState.selectedBloggers.some(b => b.id === blogger.id)) {
+            appState.selectedBloggers.push(blogger);
+          }
+        });
+        
+        document.getElementById('pickedCount').textContent = appState.selectedBloggers.length;
+        
+        // Обновляем UI
+        const cards = document.querySelectorAll('.card-blogger');
+        cards.forEach(card => {
+          const bloggerId = parseInt(card.dataset.id);
+          if (appState.selectedBloggers.some(b => b.id === bloggerId)) {
+            card.classList.add('selected');
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            if (checkbox) checkbox.checked = true;
+          }
+        });
+      }
+      
+      // Шаг 1: Очистить выбранных блогеров
+      function clearSelectedBloggers() {
+        appState.selectedBloggers = [];
+        document.getElementById('pickedCount').textContent = 0;
+        
+        // Снимаем выделение со всех карточек
+        const cards = document.querySelectorAll('.card-blogger');
+        cards.forEach(card => {
+          card.classList.remove('selected');
+          const checkbox = card.querySelector('input[type="checkbox"]');
+          if (checkbox) checkbox.checked = false;
+        });
+      }
+      
+      // Шаг 2: Сохранение брифа
+      function saveBrief(e) {
+        e.preventDefault();
+        
+        const goal = document.getElementById('briefGoal').value;
+        const budget = document.getElementById('briefBudget').value;
+        const deadline = document.getElementById('briefDeadline').value;
+        
+        appState.briefData = { goal, budget, deadline };
+        
+        document.getElementById('briefSaved').textContent = '✓ Бриф сохранен';
+        
+        setTimeout(() => {
+          goToNextStep();
+        }, 1000);
+      }
+      
+      // Шаг 3: Привязка почты
+      function linkEmail() {
+        const email = document.getElementById('emailAccount').value;
+        
+        if (email && isValidEmail(email)) {
+          appState.emailLinked = true;
+          document.getElementById('emailStatus').textContent = '✓ Почта привязана';
+          
+          setTimeout(() => {
+            goToNextStep();
+          }, 1000);
+        } else {
+          document.getElementById('emailStatus').textContent = 'Введите корректный email';
+        }
+      }
+      
+      // Валидация email
+      function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+      }
+      
+      // Шаг 4: Отправка рассылки
+      function sendOutreach() {
+        if (appState.selectedBloggers.length === 0) {
+          document.getElementById('outreachStatus').textContent = 'Сначала выберите блогеров на шаге 1';
+          return;
+        }
+        
+        appState.outreachSent = true;
+        document.getElementById('outreachStatus').textContent = '✓ Письма отправлены';
+        
+        // Имитация ответов
+        setTimeout(() => {
+          appState.responses = appState.selectedBloggers
+            .filter((_, index) => index % 2 === 0)
+            .map(blogger => ({ blogger, responded: true, status: 'interested' }));
+          
+          renderOutreachList();
+        }, 2000);
+      }
+      
+      // Шаг 4: Рендер списка рассылки
+      function renderOutreachList() {
+        const listContainer = document.getElementById('outreachList');
+        if (!listContainer) return;
+        
+        listContainer.innerHTML = '';
+        
+        appState.selectedBloggers.forEach(blogger => {
+          const response = appState.responses.find(r => r.blogger.id === blogger.id);
+          const status = response ? '✓ Ответил' : '⏳ Ожидание';
+          
+          const item = document.createElement('li');
+          item.innerHTML = `${status} - ${blogger.name} (${blogger.platform})`;
+          listContainer.appendChild(item);
+        });
+      }
+      
+      // Шаг 4: Отметить ответы вручную
+      function markResponses() {
+        alert('Функция отметки ответов');
+      }
+      
+      // Шаг 5: Подписание договора
+      function signContract() {
+        appState.contractSigned = true;
+        document.getElementById('contractStatus').textContent = '✓ Договор подписан';
+        
+        setTimeout(() => {
+          goToNextStep();
+        }, 1000);
+      }
+      
+      // Шаг 6: Резервирование средств
+      function reserveFunds() {
+        appState.paymentReserved = true;
+        document.getElementById('paymentStatus').textContent = '✓ Средства зарезервированы';
+        
+        setTimeout(() => {
+          goToNextStep();
+        }, 1000);
+      }
+      
+      // Шаг 7: Загрузка видео
+      function triggerUpload() {
+        document.getElementById('uploadInput').click();
+      }
+      
+      function handleVideoUpload(e) {
+        const file = e.target.files[0];
+        if (file) {
+          appState.videoUploaded = true;
+          document.getElementById('shootStatus').textContent = '✓ Видео загружено';
+          
+          setTimeout(() => {
+            goToNextStep();
+            }, 1000);
+        }
+      }
+      
+      // Шаг 8: Одобрение контента
+      function approveContent() {
+        const link = document.getElementById('approvalLink').value;
+        if (!link) {
+          document.getElementById('approvalStatus').textContent = 'Введите ссылку на ролик';
+          return;
+        }
+        
+        appState.approved = true;
+        document.getElementById('approvalStatus').textContent = '✓ Контент одобрен';
+        
+        setTimeout(() => {
+          goToNextStep();
+        }, 1000);
+      }
+      
+      // Шаг 8: Запрос правок
+      function requestFixes() {
+        document.getElementById('approvalStatus').textContent = '✓ Запрос правки отправлен';
+      }
+      
+      // Запуск приложения
+      initApp();
+    });
+  </script>
+</body>
+</html>

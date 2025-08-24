@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Сделка — Bloggers.tools</title>
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <script defer src="js/include.js"></script>
+  <script defer src="js/app.js"></script>
+
+  <style>
+    :root{ --gap:16px; --radius:12px }
+    .container{ max-width: 1000px }
+
+    /* Степпер */
+    .steps{ display:flex; gap:8px; flex-wrap:wrap; margin:0 0 16px; padding:0 }
+    .step{
+      position:relative; padding:8px 12px; border:1px solid #e5e5e5; border-radius:10px;
+      font-size:.92rem; background:#fff; transition:background .2s, opacity .2s, border-color .2s;
+      user-select:none; cursor:default
+    }
+    .step[data-active="true"]{ border-color:#111; background:#f6f6f6; }
+    .step[data-done="true"]{ background:#111; color:#fff; border-color:#111; }
+    .step[data-disabled="true"]{ opacity:.5; }
+
+    /* Карточки-этапы */
+    .grid{ display:grid; gap:var(--gap); grid-template-columns:1fr }
+    .card{ padding:16px; border:1px solid #eee; border-radius:var(--radius); background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.03); transition: opacity .25s }
+    .locked{ position:relative; opacity:.55; pointer-events:none; }
+    .locked::after{
+      content:"Завершите предыдущий этап";
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      background:rgba(255,255,255,.72); color:#111; font-weight:600; border-radius:var(--radius);
+    }
+
+    .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+    .form-grid{ display:grid; gap:12px; grid-template-columns:1fr 1fr }
+    .form-grid > div{ display:flex; flex-direction:column; gap:6px }
+    .form-grid input,.form-grid textarea{ padding:10px 12px; border:1px solid #ddd; border-radius:10px }
+    .muted{ color:#666 }
+    .btn:disabled{ opacity:.5; pointer-events:none }
+  </style>
+</head>
+<body>
+  <div data-include="/components/header.html"></div>
+  <div data-include="/components/nav.html"></div>
+
+  <main class="container">
+    <header class="row" style="justify-content:space-between; margin:8px 0 16px">
+      <div>
+        <h1 id="dealTitle">Сделка</h1>
+        <div id="dealMeta" class="muted"></div>
+      </div>
+      <a class="btn btn-secondary" href="agency.html">← К подбору</a>
+    </header>
+
+    <!-- Линейка этапов -->
+    <div id="steps" class="steps" aria-label="Этапы">
+      <div class="step" data-step="1">Подбор</div>
+      <div class="step" data-step="2">Бриф</div>
+      <div class="step" data-step="3">Привязка почты</div>
+      <div class="step" data-step="4">Отправка писем</div>
+      <div class="step" data-step="5">Договор</div>
+      <div class="step" data-step="6">Оплата</div>
+      <div class="step" data-step="7">Съёмка черновика</div>
+      <div class="step" data-step="8">Одобрение рекламы</div>
+      <div class="step" data-step="9">Оплата блогеру</div>
+    </div>
+
+    <section class="grid">
+      <!-- 1) Подбор -->
+      <article id="stage-1" class="card">
+        <h2>Подбор блогера</h2>
+        <p class="muted">Список выбранных на шаге поиска (из <code>localStorage.selectedBloggers</code>).</p>
+        <ul id="pickedList"></ul>
+        <div class="row">
+          <a class="btn btn-secondary" href="agency.html">Открыть поиск</a>
+        </div>
+      </article>
+
+      <!-- 2) Бриф -->
+      <article id="stage-2" class="card">
+        <h2>Бриф</h2>
+        <form id="briefForm">
+          <div class="form-grid">
+            <div style="grid-column:1/-1">
+              <label>Цель</label>
+              <textarea id="briefGoal" rows="3" placeholder="Охваты, продажи, регистрации…"></textarea>
+            </div>
+            <div>
+              <label>Бюджет</label>
+              <input id="briefBudget" type="number" min="0" step="1" placeholder="Напр.: 150000" />
+            </div>
+            <div>
+              <label>Дедлайн</label>
+              <input id="briefDeadline" type="date" />
+            </div>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" type="submit">Сохранить бриф</button>
+            <span id="briefSaved" class="muted"></span>
+          </div>
+        </form>
+      </article>
+
+      <!-- 3) Привязка почты -->
+      <article id="stage-3" class="card">
+        <h2>Привязка почты</h2>
+        <p class="muted">Имитация SMTP: укажите ящик и нажмите «Привязать».</p>
+        <div class="row">
+          <input id="emailAccount" type="email" placeholder="[email protected]" />
+          <button id="linkEmailBtn" class="btn" type="button">Привязать</button>
+          <span id="emailStatus" class="muted"></span>
+        </div>
+      </article>
+
+      <!-- 4) Отправка писем -->
+      <article id="stage-4" class="card">
+        <h2>Отправка писем</h2>
+        <p class="muted">Выбранные блогеры из шага 1. Отметьте тех, кто ответил.</p>
+        <ul id="outreachList"></ul>
+        <div class="row">
+          <button id="sendOutreachBtn" class="btn" type="button">Отправить письма</button>
+          <button id="markRespondBtn" class="btn btn-secondary" type="button">Отметить ответы</button>
+          <span id="outreachStatus" class="muted"></span>
+        </div>
+      </article>
+
+      <!-- 5) Договор -->
+      <article id="stage-5" class="card">
+        <h2>Договор</h2>
+        <p class="muted">Доступно только по отвеченным блогерам.</p>
+        <div class="row">
+          <button id="signContractBtn" class="btn" type="button">Подписать</button>
+          <span id="contractStatus" class="muted"></span>
+        </div>
+      </article>
+
+      <!-- 6) Оплата -->
+      <article id="stage-6" class="card">
+        <h2>Оплата (резерв)</h2>
+        <div class="row">
+          <button id="reserveFundsBtn" class="btn" type="button">Зарезервировать средства</button>
+          <span id="paymentStatus" class="muted"></span>
+        </div>
+      </article>
+
+      <!-- 7) Съёмка черновика -->
+      <article id="stage-7" class="card">
+        <h2>Съёмка черновика</h2>
+        <div class="row">
+          <button id="uploadBtn" class="btn" type="button">Загрузить видео</button>
+          <input id="uploadInput" type="file" accept="video/*" hidden />
+          <span id="shootStatus" class="muted"></span>
+        </div>
+      </article>
+
+      <!-- 8) Одобрение рекламы -->
+      <article id="stage-8" class="card">
+        <h2>Одобрение рекламы</h2>
+        <div class="form-grid">
+          <div style="grid-column:1/-1">
+            <label>Ссылка на опубликованный ролик</label>
+            <input id="approvalLink" type="url" placeholder="https://youtu.be/..." />
+          </div>
+          <div style="grid-column:1/-1">
+            <label>Комментарий (для «Правки»)</label>
+            <textarea id="approvalComment" rows="3" placeholder="Что поправить?"></textarea>
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button id="approveBtn" class="btn" type="button">Принять</button>
+          <button id="requestFixBtn" class="btn btn-secondary" type="button">Запросить правки</button>
+          <span id="approvalStatus" class="muted"></span>
+        </div>
+      </article>
+
+      <!-- 9) Оплата блогеру -->
+      <article id="stage-9" class="card">
+        <h2>Оплата блогеру</h2>
+        <p id="payoutInfo" class="muted">Будет произведена автоматически после «Принять».</p>
+      </article>
+    </section>
+  </main>
+
+  <div data-include="/components/footer.html"></div>
+</body>
+</html>

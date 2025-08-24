@@ -1,0 +1,161 @@
+/* =========  DESIGN TOKENS (из скриншота) ========= */
+:root{
+  /* База */
+  --bg-body: #0f1012;           /* тёмный фон страницы */
+  --surface: #f5f6f7;           /* светлая «карточка»/панель */
+  --surface-2: #ffffff;
+  --text: #eef1f3;              /* основной текст на тёмном фоне */
+  --text-muted: #a3a8b0;
+  --text-on-surface: #121417;   /* текст на светлой карточке */
+  --border: #262a2f;            /* бордеры на тёмном */
+  --surface-border: #e4e7ec;    /* бордеры на светлом */
+
+  /* Акценты (из логотипа/кнопок) */
+  --primary: #c7ff1a;           /* лаймовый (кнопка «Продолжить» на скрине) */
+  --primary-hover: #b2ea15;
+  --primary-active: #99cf12;
+  --primary-ink: #0e0f11;       /* текст на primary */
+
+  --accent: #9b51ff;            /* фиолетовый (кнопка Pro) */
+  --accent-hover: #8a3fff;
+  --accent-active: #782dff;
+  --accent-ink: #ffffff;
+
+  --link: #61d1ff;              /* ссылки в тексте на тёмном */
+
+  /* Формы/радиусы/анимации */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-1: 0 8px 24px rgba(0,0,0,.28);
+  --shadow-2: 0 2px 8px rgba(0,0,0,.10);
+  --focus: 0 0 0 3px rgba(199,255,26,.35);
+}
+
+/* =========  БАЗА/ТИПОГРАФИКА ========= */
+*{ box-sizing:border-box }
+html,body{ height:100% }
+body{
+  margin:0;
+  background:var(--bg-body);
+  color:var(--text);
+  font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+h1,h2,h3{ color:#fff; margin:0 0 .6rem }
+h1{ font-size: clamp(22px, 3vw, 28px) }
+h2{ font-size: clamp(18px, 2.4vw, 22px) }
+p{ margin:.4rem 0 .8rem }
+a{
+  color:var(--link);
+  text-decoration:none;
+}
+a:hover{ text-decoration:underline }
+
+/* =========  КНОПКИ (совместимо с .btn) ========= */
+.button,.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:10px 16px;
+  border-radius: var(--radius);
+  border:1px solid transparent;
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-weight: 600;
+  cursor:pointer;
+  transition: background .15s ease, transform .02s ease, border-color .15s ease, color .15s ease;
+  box-shadow: var(--shadow-2);
+}
+.button:hover,.btn:hover{ background: var(--primary-hover); }
+.button:active,.btn:active{ background: var(--primary-active); transform: translateY(1px); }
+.button:focus-visible,.btn:focus-visible{ outline:none; box-shadow: var(--focus); }
+
+/* Вторичная — теперь ФИОЛЕТОВАЯ заливка (как на скриншоте) */
+.btn-secondary{
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.btn-secondary:hover{
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+.btn-secondary:active{
+  background: var(--accent-active);
+  border-color: var(--accent-active);
+}
+.btn-secondary:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(155,81,255,.35);
+}
+
+/* Признаки опасных действий */
+.btn-danger{
+  background:#ff4141; color:#fff; border-color:#ff4141;
+}
+.btn-danger:hover{ background:#e33939 }
+
+/* Состояния */
+.btn:disabled, .button:disabled{ opacity:.55; cursor:not-allowed }
+
+/* =========  ФОРМЫ ========= */
+input,select,textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-on-surface);
+}
+input::placeholder,textarea::placeholder{ color:#8c9197 }
+input:focus,select:focus,textarea:focus{
+  outline:none; border-color: var(--accent); box-shadow: var(--focus);
+}
+
+/* =========  КАРТОЧКИ/ТЕКСТ НА СВЕТЛОМ ========= */
+.card{
+  background: var(--surface);
+  color: var(--text-on-surface);
+  border:1px solid var(--surface-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-2);
+}
+.card h1,.card h2,.card h3{ color:#0e0f11 }
+
+/* =========  МЕЛОЧИ ========= */
+.muted{ color: var(--text-muted) }
+.badge{
+  display:inline-block; padding:2px 8px; border-radius:999px;
+  border:1px solid rgba(199,255,26,.55);
+  color:#0e0f11; background: rgba(199,255,26,.22);
+  font-size:.82rem; font-weight:600;
+}
+.row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+
+/* =========  ПРОГРЕСС/СТЕППЕР ========= */
+.steps{ display:flex; gap:8px; flex-wrap:wrap; margin:0; padding:0; list-style:none }
+.step{
+  padding:8px 12px; border:1px solid var(--border); border-radius:10px;
+  background: transparent; color:#c9cdd4; user-select:none; cursor:default;
+  transition: background .2s, border-color .2s, color .2s, opacity .2s;
+}
+.step[data-active="true"]{
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-ink);
+}
+.step[data-done="true"]{
+  border-color: var(--accent);
+  color: #e9ddff;
+}
+.step[data-disabled="true"]{ opacity:.5 }
+
+/* Полупрозрачная блокировка будущих этапов (из deal.html) */
+.locked{
+  position:relative; opacity:.6; pointer-events:none;
+}
+.locked::after{
+  content:"Завершите предыдущий этап";
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(245,246,247,.55);
+  color:#0e0f11; font-weight:700; border-radius: var(--radius);
+}

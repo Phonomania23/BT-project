@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ЛК агентства — Bloggers.tools</title>
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+
+  <script defer src="js/include.js"></script>
+  <script defer src="js/agency.js"></script>
+
+  <style>
+    .page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 24px}
+    .grid{display:grid;gap:var(--gap);grid-template-columns:1fr}
+    .card{padding:16px;border:1px solid #eee;border-radius:12px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+    .filters{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));align-items:end}
+    .filters .field{display:flex;flex-direction:column;gap:6px}
+    .filters input,.filters select{padding:10px 12px;border:1px solid #ddd;border-radius:10px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #ddd;border-radius:999px;padding:6px 10px;font-size:.9rem;background:#fafafa}
+    .list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .muted{color:#666}
+    .right{display:flex;gap:8px;align-items:center}
+    .btn:disabled{opacity:.5;pointer-events:none}
+    .select-line{display:flex;gap:10px;align-items:center}
+    .count{font-variant-numeric:tabular-nums}
+  </style>
+</head>
+<body>
+  <div data-include="/components/header.html"></div>
+  <div data-include="/components/nav.html"></div>
+
+  <main class="container">
+    <div class="page-header">
+      <h1>Агентство: <span id="userName">Demo Agency</span></h1>
+      <button id="logoutBtn" class="btn btn-secondary" type="button">Выйти</button>
+    </div>
+
+    <!-- 1) Поиск блогеров (обязательный первый шаг) -->
+    <section class="card" aria-labelledby="search-title">
+      <div class="row" style="justify-content:space-between">
+        <h2 id="search-title">Поиск блогеров</h2>
+        <div class="right">
+          <span class="muted">Выбрано: <span id="pickedCount" class="count">0</span></span>
+          <button id="goToBrief" class="btn" type="button" disabled>Перейти к брифу</button>
+        </div>
+      </div>
+
+      <!-- ФИЛЬТРЫ -->
+      <div class="filters" style="margin-top:8px">
+        <div class="field">
+          <label for="platformSelect">Платформа</label>
+          <select id="platformSelect">
+            <option value="">Любая</option>
+            <option>YouTube</option>
+            <option>TikTok</option>
+            <option>Instagram</option>
+            <option>Telegram</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="categoryInput">Рубрика (категория)</label>
+          <input id="categoryInput" type="text" placeholder="техника, красота, игры…" />
+        </div>
+
+        <div class="field">
+          <label for="aiOnly">ИИ-рекомендации</label>
+          <div class="select-line">
+            <input id="aiOnly" type="checkbox" />
+            <span class="muted">Показывать только рекомендованных ИИ</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="searchInput">Поиск по имени/нише</label>
+          <input id="searchInput" type="search" placeholder="введите запрос…" />
+        </div>
+      </div>
+
+      <!-- АКТИВНЫЕ ФИЛЬТРЫ -->
+      <div id="activeChips" class="chips" style="margin:10px 0"></div>
+
+      <!-- РЕЗУЛЬТАТЫ (множественный выбор) -->
+      <ul id="resultsList" class="list" aria-live="polite" aria-busy="true"></ul>
+
+      <div class="row" style="margin-top:8px">
+        <button id="selectAll" class="btn btn-secondary" type="button">Выбрать все</button>
+        <button id="clearAll" class="btn btn-secondary" type="button">Сбросить выбор</button>
+        <span class="muted" style="margin-left:auto">Источник: <code>json/bloggers.json</code></span>
+      </div>
+    </section>
+
+    <!-- при желании: остальные карточки ЛК ниже -->
+
+  </main>
+
+  <div data-include="/components/footer.html"></div>
+</body>
+</html>

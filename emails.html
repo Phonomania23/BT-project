@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Рассылки — Bloggers.tools</title>
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+
+  <script defer src="js/include.js"></script>
+  <script defer src="js/emails.js"></script>
+
+  <style>
+    .page-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 0 24px}
+    .grid{display:grid;gap:var(--gap);grid-template-columns:1fr}
+    .card{padding:16px;border:1px solid #eee;border-radius:var(--radius);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+    .flex{display:flex;gap:16px;flex-wrap:wrap}
+    .left,.right{flex:1 1 380px;min-width:320px}
+    .list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;border:1px solid #efefef;border-radius:10px;padding:10px}
+    .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .muted{color:#666}
+    .hint{color:#666;font-size:.9rem}
+    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    input[type="text"], input[type="search"], textarea{
+      width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:10px
+    }
+    textarea{min-height:220px}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#f3f3f3;font-size:.85rem}
+    .toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .preview{border:1px dashed #ddd;border-radius:10px;padding:12px;background:#fcfcfc;max-height:260px;overflow:auto}
+    .danger{background:#cc1f1a;color:#fff}
+  </style>
+</head>
+<body>
+  <div data-include="/components/header.html"></div>
+  <div data-include="/components/nav.html"></div>
+
+  <main class="container">
+    <div class="page-header">
+      <h1>Рассылка офферов блогерам</h1>
+      <a class="btn btn-secondary" href="agency.html">← Вернуться в ЛК агентства</a>
+    </div>
+
+    <section class="grid">
+      <article class="card">
+        <div class="flex">
+          <!-- Левая колонка: список блогеров -->
+          <div class="left">
+            <div class="toolbar">
+              <input id="searchBloggers" type="search" placeholder="Поиск блогеров: имя / ниша / платформа…" />
+              <div class="row">
+                <label class="muted" for="selectAll">Выбрать всех</label>
+                <input id="selectAll" type="checkbox" />
+              </div>
+            </div>
+            <ul id="bloggersList" class="list" aria-live="polite" aria-busy="true"></ul>
+            <div class="muted" style="margin-top:8px">
+              Загрузка из <code>json/bloggers.json</code>
+            </div>
+          </div>
+
+          <!-- Правая колонка: форма письма -->
+          <div class="right">
+            <form id="mailForm">
+              <div class="field">
+                <label for="subject">Тема</label>
+                <input id="subject" type="text" placeholder="Напр.: {{имя}}, сотрудничество на {{дата}}" />
+              </div>
+
+              <div class="field">
+                <label for="body">Текст письма (поддержка {{имя}}, {{дата}}). Можно HTML.</label>
+                <textarea id="body">
+<p>Привет, {{имя}}! 👋</p>
+<p>Я представляю бренд <strong>YouFast VPN</strong>. Мы обожаем ваш контент и хотим предложить интеграцию c запуском <em>на {{дата}}</em>.</p>
+<ul>
+  <li>Формат: 60–90 сек спонсорский блок</li>
+  <li>Бюджет: индивидуально</li>
+  <li>Промокод: <strong>YOUFAST</strong> 🔥</li>
+</ul>
+<p>Если интересно — дайте знать, вышлю бриф и референсы. Спасибо!</p>
+<p>— Команда Bloggers.tools</p>
+                </textarea>
+                <div class="hint">Плейсхолдеры: <code>{{имя}}</code> → имя блогера, <code>{{дата}}</code> → сегодняшняя дата (локаль ru-RU).</div>
+              </div>
+
+              <div class="row" style="justify-content:space-between">
+                <button id="sendBtn" class="btn" type="submit">Отправить</button>
+                <button id="clearBtn" class="btn danger" type="button">Очистить форму</button>
+              </div>
+
+              <div style="margin-top:12px">
+                <strong>Превью (для первого выбранного):</strong>
+                <div id="preview" class="preview"></div>
+              </div>
+
+              <div class="muted" style="margin-top:8px">
+                «Отправленные» сохраняются в оверлей-аутбокс (localStorage) поверх <code>json/emails.json</code>.
+              </div>
+            </form>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div data-include="/components/footer.html"></div>
+</body>
+</html>

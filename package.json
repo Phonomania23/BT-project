@@ -1,0 +1,16 @@
+{
+  "name": "bloggers-tools-prototype",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev:web": "serve -l 3000 .",
+    "start": "serve -l 3000 .",
+    "dev:api": "json-server --watch api/db.js --port 3001 --delay 300",
+    "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "json-server": "^0.17.4",
+    "serve": "^14.2.0"
+  }
+}

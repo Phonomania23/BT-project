@@ -1,0 +1,167 @@
+[
+  {
+    "id": "1",
+    "name": "Иван Петров",
+    "platform": "YouTube",
+    "category": "техника",
+    "subscribers": 125000,
+    "er": 4.5,
+    "price": 2500,
+    "email": "ivan@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "2", 
+    "name": "Анна Сидорова",
+    "platform": "Instagram",
+    "category": "красота", 
+    "subscribers": 87000,
+    "er": 7.2,
+    "price": 1800,
+    "email": "anna@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "3",
+    "name": "Сергей Козлов", 
+    "platform": "YouTube",
+    "category": "игры",
+    "subscribers": 356000,
+    "er": 3.8,
+    "price": 4200,
+    "email": "sergey@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "4",
+    "name": "Мария Иванова",
+    "platform": "TikTok",
+    "category": "мода",
+    "subscribers": 210000,
+    "er": 8.1,
+    "price": 1900,
+    "email": "maria@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "5",
+    "name": "Дмитрий Смирнов",
+    "platform": "Telegram",
+    "category": "новости",
+    "subscribers": 45000,
+    "er": 5.5,
+    "price": 1200,
+    "email": "dmitry@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "6",
+    "name": "Ольга Кузнецова",
+    "platform": "YouTube",
+    "category": "кулинария",
+    "subscribers": 98000,
+    "er": 6.2,
+    "price": 1600,
+    "email": "olga@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "7",
+    "name": "Алексей Попов",
+    "platform": "TikTok",
+    "category": "юмор",
+    "subscribers": 320000,
+    "er": 5.8,
+    "price": 2800,
+    "email": "alex@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "8",
+    "name": "Елена Васнецова",
+    "platform": "Instagram",
+    "category": "здоровье",
+    "subscribers": 145000,
+    "er": 6.9,
+    "price": 2200,
+    "email": "elena@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "9",
+    "name": "Михаил Орлов",
+    "platform": "YouTube",
+    "category": "авто",
+    "subscribers": 189000,
+    "er": 4.2,
+    "price": 2100,
+    "email": "mikhail@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "10",
+    "name": "Светлана Котова",
+    "platform": "Instagram",
+    "category": "путешествия",
+    "subscribers": 112000,
+    "er": 7.8,
+    "price": 1950,
+    "email": "svetlana@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "11",
+    "name": "Артем Белов",
+    "platform": "Telegram",
+    "category": "крипто",
+    "subscribers": 68000,
+    "er": 8.5,
+    "price": 3200,
+    "email": "artem@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "12",
+    "name": "Наталья Зверева",
+    "platform": "YouTube",
+    "category": "образование",
+    "subscribers": 76000,
+    "er": 6.1,
+    "price": 1450,
+    "email": "natalia@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "13",
+    "name": "Павел Громов",
+    "platform": "TikTok",
+    "category": "спорт",
+    "subscribers": 430000,
+    "er": 3.9,
+    "price": 3800,
+    "email": "pavel@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "14",
+    "name": "Ирина Морозова",
+    "platform": "Instagram",
+    "category": "мода",
+    "subscribers": 92000,
+    "er": 7.4,
+    "price": 1750,
+    "email": "irina@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  },
+  {
+    "id": "15",
+    "name": "Денис Соколов",
+    "platform": "YouTube",
+    "category": "техника",
+    "subscribers": 275000,
+    "er": 4.8,
+    "price": 2950,
+    "email": "denis@example.com",
+    "avatar": "../images/avatars/placeholder.png"
+  }
+]

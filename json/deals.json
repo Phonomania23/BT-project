@@ -1,0 +1,35 @@
+[
+  {
+    "id": "d101",
+    "title": "YouFast VPN — обзор",
+    "brand": "YouFast VPN",
+    "platform": "YouTube",
+    "status": "in_progress",
+    "dueDate": "2025-08-25",
+    "metrics": { "audience": 120000, "avgViews": 45000 },
+    "chatUrl": "",
+    "files": { "brief": "files/youfast_brief.pdf", "draft": "" }
+  },
+  {
+    "id": "d102",
+    "title": "TWG Tea — интеграция",
+    "brand": "TWG Tea",
+    "platform": "Instagram",
+    "status": "awaiting_review",
+    "dueDate": "2025-08-22",
+    "metrics": { "audience": 85000, "avgViews": 27000 },
+    "chatUrl": "https://t.me/+example_chat_link",
+    "files": { "brief": "files/twg_brief.pdf", "draft": "files/twg_draft.mp4" }
+  },
+  {
+    "id": "d103",
+    "title": "TechBro — спонсорский блок",
+    "brand": "TechBro",
+    "platform": "YouTube",
+    "status": "in_progress",
+    "dueDate": "2025-08-30",
+    "metrics": { "audience": 210000, "avgViews": 68000 },
+    "chatUrl": "",
+    "files": { "brief": "files/techbro_brief.pdf", "draft": "" }
+  }
+]

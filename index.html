@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bloggers.tools — прототип</title>
+
+  <!-- Стили -->
+  <link rel="stylesheet" href="css/base.css?v=5" />
+  <link rel="stylesheet" href="css/layout.css?v=5" />
+
+  <!-- Вставка общих компонентов -->
+  <script defer src="js/include.js?v=5"></script>
+
+  <!-- Минимальные локальные стили для формы на главной -->
+  <style>
+    .hero{ text-align:center; padding:28px 0 8px }
+    .hero .logo{ height:56px; margin-bottom:10px }
+    .hero .lead{ color:var(--text-muted); margin-top:6px }
+    .actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:14px 0 }
+    .links{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:6px }
+    .login-card{ max-width:640px; margin:18px auto 0 }
+    .card{ padding:16px; border:1px solid var(--surface-border); border-radius:var(--radius); background:var(--surface); box-shadow:var(--shadow-2) }
+    .field{ display:flex; flex-direction:column; gap:6px; margin:8px 0 }
+    .field input,.field select{ padding:10px 12px; border:1px solid var(--surface-border); border-radius:10px; background:#fff; color:#121417 }
+  </style>
+</head>
+<body>
+  <!-- Шапка (логотип «Bloggers.tools» кликабелен и ведёт на главную) -->
+  <div data-include="/components/header.html"></div>
+
+  <main class="container">
+    <!-- Hero -->
+    <section class="hero">
+      <img src="images/logo.svg" alt="Логотип Bloggers.tools" class="logo" />
+      <h1>Все инструменты для блогеров и агентств — в одном месте</h1>
+      <p class="lead">Прототип личного кабинета: выберите роль или перейдите к этапам сделки.</p>
+
+      <div class="actions">
+        <a class="btn" href="agency.html">Войти как агентство</a>
+        <a class="btn btn-secondary" href="blogger.html">Войти как блогер</a>
+        <a class="btn" href="deal/index.html#/1-pick">Перейти к сделке</a>
+      </div>
+
+      <div class="links">
+        <a class="link" href="deal/index.html#/1-pick">Подбор блогеров</a>
+        <a class="link" href="emails.html">Шаблоны писем</a>
+      </div>
+    </section>
+
+    <!-- Небольшой «логин»-стаб (опционально) -->
+    <section class="card login-card">
+      <h2>Войти</h2>
+      <div class="field">
+        <label for="loginName">Имя / Компания</label>
+        <input id="loginName" type="text" placeholder="Иван / Demo Agency" />
+      </div>
+      <div class="field">
+        <label for="loginRole">Роль</label>
+        <select id="loginRole">
+          <option value="agency">Агентство/бренд</option>
+          <option value="blogger">Блогер</option>
+        </select>
+      </div>
+      <button id="loginBtn" class="btn" type="button">Продолжить</button>
+    </section>
+  </main>
+
+  <!-- Подвал -->
+  <div data-include="/components/footer.html"></div>
+
+  <!-- Лёгкая логика перехода по роли -->
+  <script>
+    (function(){
+      const btn = document.getElementById('loginBtn');
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        const name = (document.getElementById('loginName').value || 'Demo').trim();
+        const role = document.getElementById('loginRole').value;
+        if (role === 'agency') localStorage.setItem('userName', name);
+        if (role === 'blogger') localStorage.setItem('bloggerName', name);
+        location.href = role === 'agency' ? 'agency.html' : 'blogger.html';
+      });
+    })();
+  </script>
+</body>
+</html>
