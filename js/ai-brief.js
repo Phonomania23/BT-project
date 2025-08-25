@@ -1,311 +1,223 @@
-<!-- /js/ai-brief.js -->
-<script>
-/**
- * AI Brief Module — клиентский модуль анализа/улучшения брифов.
- * - Кэширует результаты по хешу ввода (LS + TTL)
- * - Вызывает /api/ai-brief (OpenAI или аналог)
- * - Имеет резервный оффлайн-анализ на эвристиках
- * - Экспортирует window.AIBrief и хелперы для шага 2
- *
- * Ожидаемая разметка на шаге 2 (/deal/index.html):
- *   - textarea#briefGoal, input#briefBudget, input#briefDeadline (как есть)
- *   - контейнер для вывода: #aiBriefPanel
- *   - кнопки: #aiAnalyzeBtn, #aiApplyBtn
- */
+// /js/ai-brief.js  — клиентский модуль AI-брифа (без <script> оболочки)
 (function () {
-  const LS_KEY = "aiBriefCacheV1";
-  const DEFAULT_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 дней
+  "use strict";
 
-  const $  = (sel, root=document) => root.querySelector(sel);
-  const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+  // === Небольшая утилита: безопасный querySelector ===
+  const $ = (sel, root = document) => root.querySelector(sel);
 
-  function readJSON(key, def){ try{ return JSON.parse(localStorage.getItem(key)||JSON.stringify(def)); }catch{ return def; } }
-  function writeJSON(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch{} }
+  // === Ключи кэша в localStorage ===
+  const LS_KEY_CACHE = "aiBrief:cache:v1";
+  const LS_KEY_API   = "OPENAI_API_KEY"; // Можно положить ключ в localStorage на dev
 
-  /** Быстрый хеш (fallback), если SubtleCrypto недоступен */
-  function poorHash(str){
+  // === Простой кэш (ключ — хэш данных брифа) ===
+  const Cache = {
+    readAll() { try { return JSON.parse(localStorage.getItem(LS_KEY_CACHE) || "{}"); } catch { return {}; } },
+    writeAll(obj) { try { localStorage.setItem(LS_KEY_CACHE, JSON.stringify(obj)); } catch {} },
+    get(hash) { return this.readAll()[hash]; },
+    set(hash, value) { const all = this.readAll(); all[hash] = value; this.writeAll(all); }
+  };
+
+  // Простой хеш для строки (без крипто, нам для кэша ок)
+  function hashOf(str) {
     let h = 2166136261 >>> 0;
-    for (let i = 0; i < str.length; i++){
+    for (let i = 0; i < str.length; i++) {
       h ^= str.charCodeAt(i);
-      h += (h<<1) + (h<<4) + (h<<7) + (h<<8) + (h<<24);
+      h = Math.imul(h, 16777619);
     }
-    return ("0000000"+(h>>>0).toString(16)).slice(-8);
+    return ("h" + (h >>> 0).toString(16));
   }
 
-  async function sha256(data){
-    try{
-      const enc = new TextEncoder().encode(data);
-      const buf = await crypto.subtle.digest("SHA-256", enc);
-      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
-    }catch{
-      return poorHash(data);
-    }
+  // Отрисовка панели результатов
+  function renderPanel(html) {
+    const box = $("#aiBriefPanel");
+    if (!box) return;
+    box.innerHTML = html;
   }
 
-  function now(){ return Date.now(); }
+  // Красивый блок рекомендаций
+  function renderResultUI(result) {
+    const {
+      completenessReport = [],
+      improvements = [],
+      creativeIdeas = [],
+      contentFormats = [],
+      warnings = []
+    } = result || {};
 
-  function getCache(){
-    const data = readJSON(LS_KEY, { items:{} });
-    if (!data.items) data.items = {};
-    return data;
-  }
-  function setCache(cache){ writeJSON(LS_KEY, cache); }
-
-  function getFromCache(key){
-    const cache = getCache();
-    const rec = cache.items[key];
-    if (!rec) return null;
-    if (rec.expires && rec.expires < now()){
-      delete cache.items[key];
-      setCache(cache);
-      return null;
-    }
-    return rec.value;
-  }
-
-  function setToCache(key, value, ttl=DEFAULT_TTL_MS){
-    const cache = getCache();
-    cache.items[key] = { value, expires: now()+ttl };
-    setCache(cache);
-  }
-
-  /** Эвристический оффлайн-анализ — когда API недоступно */
-  function fallbackAnalyze(brief){
-    const issues = [];
-    const questions = [];
-    const suggestions = [];
-    const ideas = [];
-    const formats = [];
-
-    const goal = (brief.goal||"").trim();
-    const budget = +brief.budget || 0;
-    const deadline = (brief.deadline||"").trim();
-
-    if (!goal) issues.push("Не указана цель кампании.");
-    if (!budget) issues.push("Не указан бюджет (₽).");
-    if (!deadline) issues.push("Не указан дедлайн.");
-
-    // Рекомендуемые дополнения
-    if (!/аудитор/i.test(goal)) suggestions.push("Добавьте описание целевой аудитории: возраст, гео, интересы, pain points.");
-    if (!/cta|призыв|действ/i.test(goal)) suggestions.push("Пропишите чёткий CTA (действие после просмотра).");
-    if (!/kpi|роас|cpa|cpl|просмотр/i.test(goal)) suggestions.push("Определите KPI/метрики успеха: CPA/CPL/ROAS, просмотры, CTR, код/UTM.");
-    if (!/tone|тон/i.test(goal)) suggestions.push("Уточните тон/стиль: экспертный, дружелюбный, провокационный и т.д.");
-    if (!/формат|ролик|сторис|shorts|reels/i.test(goal)) suggestions.push("Определите форматы: обзор, интеграция, челлендж, туториал, UGC.");
-
-    // Идеи — примитивно, на основе упоминаний в цели
-    const isTech = /техник|гаджет|софт|app|прилож/i.test(goal);
-    const isBeauty = /красот|beauty|космет/i.test(goal);
-    const isFood = /еда|food|рецеп/i.test(goal);
-    const isEdu = /курс|обуч|образован/i.test(goal);
-
-    if (isTech){
-      ideas.push(
-        "Серия «7 дней с продуктом»: честный дневник опыта",
-        "«Мифы и правда» о продукте — краш-тест и сравнение",
-        "Челлендж «смена привычки за неделю» с фиксацией метрик"
-      );
-      formats.push("YouTube интеграция 60–90 сек", "Shorts/Reels: 3×15–30 сек", "TikTok челлендж");
-    } else if (isBeauty){
-      ideas.push(
-        "До/после с прозрачной методологией",
-        "Разбор состава и аналогов («value за рубль»)",
-        "Съёмка «рутина дня» с продуктом в естественном контексте"
-      );
-      formats.push("Reels/TikTok 3×20–30 сек", "UGC-отзывы", "Интеграция у эксперта");
-    } else if (isFood){
-      ideas.push(
-        "«5 быстрых рецептов за 15 минут» с продуктом",
-        "Слепая дегустация vs конкуренты",
-        "«Неделя рационов» — план питания с ценой"
-      );
-      formats.push("Short-form сериалы", "YouTube интеграция", "Shorts с нарезками рецептов");
-    } else if (isEdu){
-      ideas.push(
-        "«30-дневный челлендж навыка» с чек-листами",
-        "Кейс «ноль → результат за 2 недели»",
-        "Обзор полезных фреймворков и практик"
-      );
-      formats.push("YouTube long-form 5–10 мин", "Карусели в IG", "TikTok разборы");
-    } else {
-      ideas.push(
-        "Челлендж «7 дней — 7 инсайтов»",
-        "История пользователя (UGC) + честный отзыв",
-        "«Ошибки и как их избежать» — экспертный формат"
-      );
-      formats.push("Интеграция 45–90 сек", "3×Shorts/Reels", "Стрим/AMA 20–40 мин");
-    }
-
-    // Слабая оценка полноты (0–100)
-    let score = 40;
-    if (goal) score += 20;
-    if (budget) score += 20;
-    if (deadline) score += 10;
-    if (suggestions.length <= 2) score += 10;
-
-    return {
-      source: "fallback",
-      score: Math.max(0, Math.min(100, score)),
-      issues,
-      questions: questions.length ? questions : [
-        "Кто основная ЦА? Возраст/гео/интересы/уровень дохода.",
-        "Какой ключевой инсайт/боль аудитории решает продукт?",
-        "Какой CTA и целевая посадочная? Нужен промокод/UTM?",
-        "Есть ли ограничения по креативу/сообщениям/конкурентам?",
-        "Какие KPI важнее всего (просмотры/CPA/ROAS/регистрации)?"
-      ],
-      suggestions,
-      ideas,
-      formats
+    const block = (title, items) => {
+      if (!items || !items.length) return "";
+      const lis = items.map(x => `<li>${escapeHtml(x)}</li>`).join("");
+      return `
+        <section style="margin:8px 0">
+          <h3 style="margin:0 0 6px 0">${escapeHtml(title)}</h3>
+          <ul style="margin:0 0 0 16px;padding:0">${lis}</ul>
+        </section>`;
     };
-  }
 
-  /** Вызов серверного эндпоинта (можно заменить на любой аналог) */
-  async function callAPI(brief, signal){
-    const r = await fetch("/api/ai-brief", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ brief }),
-      signal
-    });
-    if (!r.ok) {
-      const text = await r.text().catch(()=> "");
-      throw new Error(`API ${r.status}: ${text||r.statusText}`);
-    }
-    const data = await r.json();
-    if (!data || data.ok !== true || !data.result) {
-      throw new Error(data && data.error || "Некорректный ответ AI");
-    }
-    return data.result;
-  }
+    const warnBlock = warnings?.length
+      ? `<div class="muted" style="margin-top:8px;color:#b55">Предупреждения: ${warnings.map(escapeHtml).join("; ")}</div>`
+      : "";
 
-  /** Публичный метод анализа + кэш */
-  async function analyze(brief, opts={}){
-    const ttl = Number(opts.ttlMs ?? DEFAULT_TTL_MS) || DEFAULT_TTL_MS;
-    const keyInput = JSON.stringify({
-      goal: (brief.goal||"").trim(),
-      budget: Number(brief.budget||0),
-      deadline: (brief.deadline||"").trim(),
-      audience: (brief.audience||"").trim(),
-      product: (brief.product||"").trim(),
-      kpi: (brief.kpi||"").trim(),
-      tone: (brief.tone||"").trim(),
-      platforms: (brief.platforms||"").trim()
-    });
-    const hash = await sha256(keyInput);
-
-    const cached = getFromCache(hash);
-    if (cached) return { ...cached, cached: true };
-
-    // Пытаемся API → иначе fallback
-    try{
-      const ctrl = new AbortController();
-      const timer = setTimeout(()=> ctrl.abort(), opts.timeoutMs || 20000);
-      const result = await callAPI(JSON.parse(keyInput), ctrl.signal);
-      clearTimeout(timer);
-      setToCache(hash, { ...result, cached:false }, ttl);
-      return result;
-    }catch(e){
-      const fb = fallbackAnalyze(JSON.parse(keyInput));
-      setToCache(hash, { ...fb, cached:false }, ttl);
-      return fb;
-    }
-  }
-
-  /** Рендер результата в контейнер */
-  function renderResult(container, res){
-    if (!container) return;
-    const esc = (s)=> String(s||"").replace(/[&<>"]/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;" }[m]));
-    const li = (arr)=> arr && arr.length ? "<ul>"+arr.map(x=>`<li>${esc(x)}</li>`).join("")+"</ul>" : "<div class='muted'>—</div>";
-    container.innerHTML = `
-      <div class="card" style="border-color:#e0e0e0">
-        <div class="row" style="justify-content:space-between;align-items:center">
-          <h3 style="margin:0">AI-оценка брифа</h3>
-          <span class="badge" title="${res.cached ? "из кэша" : (res.source||"ai")}">Score: <strong>${Number(res.score||0)}</strong>/100</span>
-        </div>
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:16px; margin-top:10px">
-          <div>
-            <div class="muted" style="font-weight:700;margin-bottom:6px">Пробелы/неясности</div>
-            ${li(res.issues)}
-          </div>
-          <div>
-            <div class="muted" style="font-weight:700;margin-bottom:6px">Что уточнить у бренда</div>
-            ${li(res.questions)}
-          </div>
-          <div>
-            <div class="muted" style="font-weight:700;margin-bottom:6px">Рекомендации</div>
-            ${li(res.suggestions)}
-          </div>
-          <div>
-            <div class="muted" style="font-weight:700;margin-bottom:6px">Идеи креативов</div>
-            ${li(res.ideas)}
-          </div>
-          <div>
-            <div class="muted" style="font-weight:700;margin-bottom:6px">Оптимальные форматы</div>
-            ${li(res.formats)}
-          </div>
+    return `
+      <div>
+        ${block("Полнота и ясность", completenessReport)}
+        ${block("Конкретные улучшения", improvements)}
+        ${block("Креативные идеи (по ЦА)", creativeIdeas)}
+        ${block("Рекомендованные форматы", contentFormats)}
+        ${warnBlock}
+        <div style="margin-top:10px">
+          <button id="aiApplyBtn" class="btn btn-secondary" type="button">Применить рекомендации</button>
         </div>
       </div>
     `;
   }
 
-  /** Собор данных из формы шага 2 (мягко — поля опциональны) */
-  function collectFromStep2(){
-    const v = id => document.getElementById(id)?.value?.trim() || "";
-    return {
-      goal: v("briefGoal"),
-      budget: v("briefBudget"),
-      deadline: v("briefDeadline"),
-      audience: v("briefAudience"),
-      product: v("briefProduct"),
-      kpi: v("briefKPI"),
-      tone: v("briefTone"),
-      platforms: v("briefPlatforms")
-    };
+  function escapeHtml(s) {
+    return String(s || "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
-  async function runFromUI(){
-    const panel = document.getElementById("aiBriefPanel");
-    const btn = document.getElementById("aiAnalyzeBtn");
-    const applyBtn = document.getElementById("aiApplyBtn");
-    if (!panel || !btn) return;
+  // Сбор данных брифа из формы
+  function collectBriefFromForm() {
+    const goal       = $("#briefGoal")?.value?.trim() || "";
+    const budget     = Number($("#briefBudget")?.value || 0) || 0;
+    const deadline   = $("#briefDeadline")?.value || "";
+    const audience   = $("#briefAudience")?.value?.trim() || "";
+    const product    = $("#briefProduct")?.value?.trim() || "";
+    const kpi        = $("#briefKPI")?.value?.trim() || "";
+    const tone       = $("#briefTone")?.value?.trim() || "";
+    const platforms  = $("#briefPlatforms")?.value?.trim() || "";
 
-    btn.disabled = true; btn.textContent = "Анализ…";
-    panel.innerHTML = `<div class="muted">AI анализирует бриф…</div>`;
-    try{
-      const data = collectFromStep2();
-      const res = await analyze(data);
-      renderResult(panel, res);
-      if (applyBtn){
-        applyBtn.disabled = false;
-        applyBtn.onclick = () => applyRecommendationsToGoal(res);
-      }
-    }catch(e){
-      panel.innerHTML = `<div class="muted">Не удалось выполнить анализ (${e.message||e}). Попробуйте позже.</div>`;
-    }finally{
-      btn.disabled = false; btn.textContent = "AI-анализ брифа";
+    return { goal, budget, deadline, audience, product, kpi, tone, platforms };
+  }
+
+  // Подсветка ошибок заполнения минимума
+  function validateMinimum(b) {
+    if (!b.goal || !b.budget || !b.deadline) {
+      throw new Error("Заполните минимум: цель, бюджет и дедлайн.");
     }
   }
 
-  /** Применение рекомендаций: доклеиваем к цели короткое резюме */
-  function applyRecommendationsToGoal(res){
-    const goalEl = document.getElementById("briefGoal");
-    if (!goalEl) return;
-    const take = (arr, n)=> (arr||[]).slice(0,n);
-    const append = [
-      "",
-      "— AI: основные рекомендации —",
-      ...take(res.suggestions, 4).map((s,i)=>`${i+1}) ${s}`),
-      "Идеи: " + take(res.ideas, 3).join(" · "),
-      "Форматы: " + take(res.formats, 3).join(" · ")
-    ].join("\n");
-    goalEl.value = (goalEl.value||"").trim() + "\n\n" + append;
-    try{
-      goalEl.dispatchEvent(new Event("input", { bubbles:true }));
-      goalEl.dispatchEvent(new Event("change", { bubbles:true }));
-    }catch{}
+  // Рендер «состояний»
+  function renderLoading() {
+    renderPanel(`<div class="muted">Анализируем бриф…</div>`);
+  }
+  function renderError(msg) {
+    renderPanel(`<div class="muted" style="color:#b55">Ошибка: ${escapeHtml(msg)}</div>`);
   }
 
-  // Экспорт
-  window.AIBrief = { analyze, renderResult, runFromUI, collectFromStep2 };
+  // === Вызов сервера (Vercel Function /api/ai-brief) ===
+  async function runServerless(brief) {
+    const resp = await fetch("/api/ai-brief", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ brief })
+    });
+    if (!resp.ok) {
+      const text = await resp.text().catch(()=>"");
+      throw new Error(`API ${resp.status}: ${text || resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
+  // === Локальный режим (прямо из браузера, для dev; нужен ключ в localStorage) ===
+  async function runLocal(brief) {
+    const key = localStorage.getItem(LS_KEY_API) || "";
+    if (!key) throw new Error("Нет API-ключа. Для dev положите его в localStorage по ключу OPENAI_API_KEY, либо используйте серверный режим /api/ai-brief.");
+    // Небольшая подсказка, что ключ хранится только локально в браузере
+    console.warn("Using local OpenAI API key from localStorage — dev only.");
+
+    const sys = [
+      "Ты — ИИ-помощник по брифам. Проверь полноту/ясность, предложи улучшения, идеи под ЦА и форматы контента.",
+      "Отвечай кратко пунктами, без «воды». Верни JSON с полями: completenessReport[], improvements[], creativeIdeas[], contentFormats[], warnings[]"
+    ].join(" ");
+
+    const user = "Brief data (JSON):\n" + JSON.stringify(brief, null, 2);
+
+    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + key
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role:"system", content: sys },
+          { role:"user", content: user }
+        ],
+        temperature: 0.6
+      })
+    });
+
+    if (!r.ok) {
+      const t = await r.text().catch(()=> "");
+      throw new Error(`OpenAI ${r.status}: ${t || r.statusText}`);
+    }
+    const data = await r.json();
+    const content = data?.choices?.[0]?.message?.content || "";
+    // Пытаемся вычленить JSON из ответа
+    const m = content.match(/\{[\s\S]*\}$/);
+    let parsed;
+    try { parsed = JSON.parse(m ? m[0] : content); }
+    catch { parsed = { improvements:[content || ""] }; }
+    return parsed;
+  }
+
+  // === Главный раннер с кэшем и fallback ===
+  async function runAnalysis(brief) {
+    validateMinimum(brief);
+
+    // Кэш
+    const key = hashOf(JSON.stringify(brief));
+    const cached = Cache.get(key);
+    if (cached) return { ...cached, _cached:true };
+
+    // Сначала пробуем серверный режим, если упадёт — пробуем локальный
+    try {
+      const data = await runServerless(brief);
+      Cache.set(key, data);
+      return data;
+    } catch (e) {
+      console.warn("Serverless API failed, trying local…", e);
+      const data = await runLocal(brief);
+      Cache.set(key, data);
+      return data;
+    }
+  }
+
+  // === Публичный API модуля (вешаем на window) ===
+  window.AIBrief = {
+    async runFromUI() {
+      try {
+        const brief = collectBriefFromForm();
+        renderLoading();
+        const result = await runAnalysis(brief);
+        renderPanel(renderResultUI(result));
+
+        // Активируем кнопку «Применить рекомендации» после получения ответа
+        const applyBtn = $("#aiApplyBtn");
+        if (applyBtn) {
+          applyBtn.disabled = false;
+          applyBtn.addEventListener("click", () => {
+            // Простой «апплай»: добавим идеи к цели, если пусто — подсказка
+            const goalEl = $("#briefGoal");
+            if (goalEl && result?.improvements?.length) {
+              const addendum = "\n\nAI рекомендации:\n• " + result.improvements.join("\n• ");
+              goalEl.value = (goalEl.value || "") + addendum;
+              const saved = $("#briefSaved");
+              if (saved) { saved.textContent = "Рекомендации добавлены в поле «Цель»."; setTimeout(()=> saved.textContent="", 1500); }
+            }
+          }, { once:true });
+        }
+      } catch (err) {
+        renderError(err?.message || String(err));
+      }
+    }
+  };
+
+  // На всякий случай — доступ из консоли
+  console.log("[ai-brief] ready");
+
 })();
-</script>

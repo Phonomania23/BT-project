@@ -1,16 +1,27 @@
 {
   "name": "bloggers-tools-prototype",
+  "version": "0.2.0",
   "private": true,
-  "version": "0.1.0",
+  "description": "Static site + mock API (json-server) + Vercel serverless endpoint /api/ai-brief for AI brief assistant.",
+  "type": "module",
   "scripts": {
-    "dev:web": "serve -l 3000 .",
-    "start": "serve -l 3000 .",
     "dev:api": "json-server --watch api/db.js --port 3001 --delay 300",
-    "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\""
+    "dev:vercel": "vercel dev --listen 3000",
+    "dev": "concurrently -k -n api,vercel -c green,magenta \"npm:dev:api\" \"npm:dev:vercel\"",
+    "start": "vercel dev --listen 3000",
+    "build": "echo \"no build step\"",
+    "dev:web": "serve -l 3000 ."
+  },
+  "dependencies": {
+    "openai": "^4.55.0"
   },
   "devDependencies": {
     "concurrently": "^9.0.0",
     "json-server": "^0.17.4",
-    "serve": "^14.2.0"
+    "serve": "^14.2.0",
+    "vercel": "^34.0.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
