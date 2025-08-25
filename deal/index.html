@@ -35,7 +35,7 @@
 
   <!-- Скрипты (ВАЖЕН ПОРЯДОК) -->
   <script defer src="../js/include.js?v=6"></script>
-  <!-- Подключаем AI скрипт -->
+  <!-- Подключаем AI скрипт (для шага 2) -->
   <script defer src="../js/ai-brief.js?v=1"></script>
 
   <!-- Адаптер: делаем фильтры на шаге «Подбор» такими же, как на agency.html -->
@@ -44,10 +44,14 @@
     window.initPickStep = function(){
       // Состояние
       const appState = {
-        selectedIds: new Set(readPicked()) // восстанавливаем выбор
+        selectedIds: new Set(readPicked()) // восстанавливаем выбор (нормализуем к id)
       };
 
-      // Данные (как в agency.html — mock с расширенными полями)
+      // Быстрые селекторы
+      const $ = sel => document.querySelector(sel);
+      const resultsEl = $('#resultsList');
+
+      // Мок-данные (как на agency.html)
       const mockBloggers = [
         { id: 1,  name: "Иван Петров",     platform: "YouTube",   followers: 125000, er: 4.5, category: "техника",     price: 2500, email: "ivan@example.com",   geo: "RU", audienceGeo: "RU", audienceAge: "25-34", bloggerAge: "28", audienceGender: "male",   bloggerGender: "male" },
         { id: 2,  name: "Анна Сидорова",   platform: "Instagram", followers: 87000,  er: 7.2, category: "красота",     price: 1800, email: "anna@example.com",   geo: "RU", audienceGeo: "RU", audienceAge: "18-24", bloggerAge: "22", audienceGender: "female", bloggerGender: "female" },
@@ -63,15 +67,11 @@
         { id:12,  name: "Чжан Мин",        platform: "YouTube",   followers: 125000, er: 6.5, category: "образование", price: 1800, email: "zhang@example.com",  geo: "CN", audienceGeo: "CN", audienceAge: "25-34", bloggerAge: "30", audienceGender: "female", bloggerGender: "female" }
       ];
 
-      // Быстрые селекторы
-      const $ = sel => document.querySelector(sel);
-      const resultsEl = $('#resultsList');
-
       // Инициализация
       setupEventListeners();
       applyFilters();
       updateSelectionCount();
-      // Обновим хранилище на старте
+      // Обновим хранилище на старте (нормализованный формат)
       writePicked([...appState.selectedIds]);
 
       function setupEventListeners(){
@@ -104,7 +104,8 @@
           // Сброс чекбоксов и подсветки
           resultsEl?.querySelectorAll('.card-blogger').forEach(li=>{
             li.classList.remove('selected');
-            li.querySelector('input[type="checkbox"]')?.checked && (li.querySelector('input[type="checkbox"]').checked=false);
+            const cb = li.querySelector('input[type="checkbox"]');
+            if (cb) cb.checked = false;
           });
         });
       }
@@ -126,7 +127,7 @@
         const priceMax       = parseInt($('#fPriceMax')?.value || '') || Infinity;
         const q              = ($('#fQuery')?.value || '').toLowerCase();
 
-        let list = mockBloggers.filter(b=>{
+        const list = mockBloggers.filter(b=>{
           if (platform && b.platform !== platform) return false;
           const fK = b.followers/1000;
           if (fK < minFollowersK || fK > maxFollowersK) return false;
@@ -152,7 +153,8 @@
         // Чипы
         updateActiveChips();
         // Счётчики
-        $('#resultsCount').textContent = list.length;
+        const rc = document.getElementById('resultsCount');
+        if (rc) rc.textContent = list.length;
       }
 
       function renderList(list){
@@ -165,14 +167,14 @@
         list.forEach(b=>{
           const isSel = appState.selectedIds.has(String(b.id));
           const li = document.createElement('li');
-          li.className = 'card-blogger' + (isSel ? ' selected':'');
+          li.className = 'card-blogger' + (isSel ? ' selected' : '');
           li.innerHTML = `
             <div class="avatar">${b.name.charAt(0)}</div>
             <div>
               <div class="name">${b.name}</div>
               <div class="meta">
                 <span class="badge">${b.platform}</span>
-                <span class="badge">${b.category</span>
+                <span class="badge">${b.category}</span>
                 <span class="badge">${b.geo}</span>
                 <span class="badge">Аудитория: ${b.audienceAge}</span>
                 <span class="badge">${b.bloggerGender === 'male' ? 'М' : 'Ж'}, ${b.bloggerAge} лет</span>
@@ -182,7 +184,7 @@
               </div>
               <div class="actions">
                 <label class="select-radio">
-                  <input type="checkbox" data-id="${b.id}" ${isSel?'checked':''}/> В выборку
+                  <input type="checkbox" data-id="${b.id}" ${isSel ? 'checked' : ''}/> В выборку
                 </label>
               </div>
             </div>
@@ -243,28 +245,23 @@
           ['Поиск',          $('#fQuery')?.value]
         ].filter(([,v])=>v);
 
-        filters.forEach(([label, v, id])=>{
+        filters.forEach(([label, v])=>{
           const chip = document.createElement('div');
           chip.className = 'chip-filter';
           chip.innerHTML = `${label}: ${v} <button type="button">×</button>`;
           chip.querySelector('button').addEventListener('click', ()=>{
-            // грубо находим по тексту, но проще — почистим все связанные поля
-            switch(label){
-              case 'Платформа': $('#fPlatform').value=''; break;
-              case 'Подписчики от': $('#followersMinK').value=''; break;
-              case 'Подписчики до': $('#followersMaxK').value=''; break;
-              case 'Рубрика': $('#fCategory').value=''; break;
-              case 'Гео аудитории': $('#fAudienceGeo').value=''; break;
-              case 'Гео блогера': $('#fBloggerGeo').value=''; break;
-              case 'Возраст ауд.': $('#fAudienceAge').value=''; break;
-              case 'Возраст блогера': $('#fBloggerAge').value=''; break;
-              case 'Пол аудитории': $('#fAudienceGender').value=''; break;
-              case 'Пол блогера': $('#fBloggerGender').value=''; break;
-              case 'ER от': $('#fErMin').value=''; break;
-              case 'ER до': $('#fErMax').value=''; break;
-              case 'Цена от': $('#fPriceMin').value=''; break;
-              case 'Цена до': $('#fPriceMax').value=''; break;
-              case 'Поиск': $('#fQuery').value=''; break;
+            // Сбрасываем соответствующее поле по клику на ×
+            const map = {
+              'Платформа':'fPlatform','Подписчики от':'followersMinK','Подписчики до':'followersMaxK',
+              'Рубрика':'fCategory','Гео аудитории':'fAudienceGeo','Гео блогера':'fBloggerGeo',
+              'Возраст ауд.':'fAudienceAge','Возраст блогера':'fBloggerAge',
+              'Пол аудитории':'fAudienceGender','Пол блогера':'fBloggerGender',
+              'ER от':'fErMin','ER до':'fErMax','Цена от':'fPriceMin','Цена до':'fPriceMax','Поиск':'fQuery'
+            };
+            const id = map[label];
+            if (id) {
+              const el = document.getElementById(id);
+              if (el) el.value = '';
             }
             applyFilters();
           });
@@ -275,8 +272,12 @@
         function genderTxt(v){ return v===''? '': (v==='male'?'Мужской': v==='female'?'Женский':'') }
       }
 
+      // ====== helpers: storage (нормализация массива id) ======
       function readPicked(){
-        try{ return JSON.parse(localStorage.getItem('selectedBloggers')||'[]'); }catch{ return [] }
+        try{
+          const raw = JSON.parse(localStorage.getItem('selectedBloggers')||'[]');
+          return raw.map(x => (typeof x === 'object' ? x?.id : x)).filter(Boolean).map(String);
+        }catch{ return []; }
       }
       function writePicked(arr){
         try{ localStorage.setItem('selectedBloggers', JSON.stringify(arr)); }catch{}
