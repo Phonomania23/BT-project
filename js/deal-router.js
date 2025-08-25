@@ -224,6 +224,15 @@ function initStep2() {
   if (budget) budget.value = f.brief.budget || "";
   if (deadline) deadline.value = f.brief.deadline || "";
 
+  // Заполняем дополнительные поля AI
+  const audience = $("#briefAudience"), product = $("#briefProduct"), 
+        kpi = $("#briefKPI"), tone = $("#briefTone"), platforms = $("#briefPlatforms");
+  if (audience) audience.value = f.brief.audience || "";
+  if (product) product.value = f.brief.product || "";
+  if (kpi) kpi.value = f.brief.kpi || "";
+  if (tone) tone.value = f.brief.tone || "";
+  if (platforms) platforms.value = f.brief.platforms || "";
+
   const form = $("#briefForm");
   if (form) {
     form.addEventListener("submit", (e) => {
@@ -231,9 +240,16 @@ function initStep2() {
       const data = {
         goal: (goal?.value || "").trim(),
         budget: Number(budget?.value || 0),
-        deadline: deadline?.value || ""
+        deadline: deadline?.value || "",
+        audience: $("#briefAudience")?.value || "",
+        product: $("#briefProduct")?.value || "",
+        kpi: $("#briefKPI")?.value || "",
+        tone: $("#briefTone")?.value || "",
+        platforms: $("#briefPlatforms")?.value || ""
       };
-      if (!data.goal || !data.budget || !data.deadline) return alert("Заполните все поля брифа.");
+      if (!data.goal || !data.budget || !data.deadline) {
+        return alert("Заполните минимум: цель, бюджет и дедлайн.");
+      }
       setFunnel({ brief: { ...data, done: true } });
       const savedEl = $("#briefSaved");
       if (savedEl) {
@@ -242,6 +258,11 @@ function initStep2() {
       }
     });
   }
+
+  // ====== НОВОЕ: привязка ИИ-кнопок ======
+  $("#aiAnalyzeBtn")?.addEventListener("click", () => { window.AIBrief?.runFromUI(); });
+  // Кнопка применения рекомендаций активируется модулем после анализа
+  // =======================================
 }
 
 // Шаг 3 — Привязка почты

@@ -35,6 +35,8 @@
 
   <!-- Скрипты (ВАЖЕН ПОРЯДОК) -->
   <script defer src="../js/include.js?v=6"></script>
+  <!-- Подключаем AI скрипт -->
+  <script defer src="../js/ai-brief.js?v=1"></script>
 
   <!-- Адаптер: делаем фильтры на шаге «Подбор» такими же, как на agency.html -->
   <script defer>
@@ -170,7 +172,7 @@
               <div class="name">${b.name}</div>
               <div class="meta">
                 <span class="badge">${b.platform}</span>
-                <span class="badge">${b.category}</span>
+                <span class="badge">${b.category</span>
                 <span class="badge">${b.geo}</span>
                 <span class="badge">Аудитория: ${b.audienceAge}</span>
                 <span class="badge">${b.bloggerGender === 'male' ? 'М' : 'Ж'}, ${b.bloggerAge} лет</span>
@@ -480,25 +482,63 @@
     <ul id="resultsList" class="cards-list"></ul>
   </template>
 
-  <!-- Шаг 2: Бриф -->
+  <!-- Шаг 2: Бриф (с ИИ) -->
   <template id="tpl-2-brief">
     <h2>Бриф</h2>
+
     <form id="briefForm" class="grid">
       <div class="field" style="grid-column:1/-1">
         <label>Цель</label>
-        <textarea id="briefGoal" rows="3" placeholder="Что хотим достичь…" required></textarea>
+        <textarea id="briefGoal" rows="3" placeholder="Что хотим достичь… (ЦА, инсайт, УТП, промо-предложение, CTA) " required></textarea>
       </div>
+
       <div class="field">
         <label>Бюджет, ₽</label>
         <input id="briefBudget" type="number" min="1" required />
       </div>
+
       <div class="field">
         <label>Дедлайн</label>
         <input id="briefDeadline" type="date" required />
       </div>
-      <div class="muted" id="briefSaved"></div>
-      <button class="btn" type="submit">Сохранить бриф</button>
+
+      <!-- Доп. поля (необязательно, но улучшат анализ) -->
+      <div class="field">
+        <label>Целевая аудитория (опционально)</label>
+        <input id="briefAudience" type="text" placeholder="возраст, гео, интересы, боли" />
+      </div>
+      <div class="field">
+        <label>Продукт/УТП (опционально)</label>
+        <input id="briefProduct" type="text" placeholder="что рекламируем, главное преимущество" />
+      </div>
+      <div class="field">
+        <label>KPI/метрики (опционально)</label>
+        <input id="briefKPI" type="text" placeholder="CPA, ROAS, регистрации, просмотры…" />
+      </div>
+      <div class="field">
+        <label>Тон/стиль (опционально)</label>
+        <input id="briefTone" type="text" placeholder="дружелюбный, экспертный, провокационный…" />
+      </div>
+      <div class="field">
+        <label>Платформы (опционально)</label>
+        <input id="briefPlatforms" type="text" placeholder="YouTube, TikTok, Instagram…" />
+      </div>
+
+      <div class="row" style="gap:12px; align-items:center">
+        <button class="btn" type="submit">Сохранить бриф</button>
+        <span class="muted" id="briefSaved"></span>
+
+        <!-- ИИ-кнопки -->
+        <span class="muted" style="margin-left:auto">AI помощник:</span>
+        <button id="aiAnalyzeBtn" class="btn btn-secondary" type="button">AI-анализ брифа</button>
+        <button id="aiApplyBtn" class="btn btn-secondary" type="button" disabled>Применить рекомендации</button>
+      </div>
     </form>
+
+    <!-- Панель с результатами ИИ -->
+    <div id="aiBriefPanel" class="card" style="margin-top:16px; padding:16px; display:block">
+      <div class="muted">Нажмите «AI-анализ брифа», чтобы получить рекомендации.</div>
+    </div>
   </template>
 
   <!-- Шаг 3: Привязка почты -->
