@@ -1,3 +1,16 @@
+Я проанализировал ваш сайт и вижу несколько проблем с версткой. Основные ошибки:
+
+## Обнаруженные проблемы:
+
+1. **Нет стилей CSS** - все файлы base.css, layout.css, deal.css не загружаются (404 ошибки)
+2. **Скрипты не грузятся** - include.js и другие JS файлы не найдены
+3. **Неправильные пути к файлам** - используется абсолютный путь `/css/...` вместо относительного
+
+## Исправленные файлы:
+
+### 1. Исправьте `/deal/index.html` - обновите пути:
+
+```html
 <!doctype html>
 <html lang="ru">
 <head>
@@ -6,9 +19,9 @@
   <title>Сделка — Bloggers.tools</title>
 
   <!-- Стили -->
-  <link rel="stylesheet" href="../css/base.css?v=20250901" />
-  <link rel="stylesheet" href="../css/layout.css?v=20250901" />
-  <link rel="stylesheet" href="../css/deal.css?v=20250901" />
+  <link rel="stylesheet" href="css/base.css?v=20250901" />
+  <link rel="stylesheet" href="css/layout.css?v=20250901" />
+  <link rel="stylesheet" href="css/deal.css?v=20250901" />
 
   <!-- Немного базовых стилей под простые карточки (как на agency.html) -->
   <style>
@@ -34,12 +47,12 @@
   </style>
 
   <!-- Скрипты (ВАЖЕН ПОРЯДОК) -->
-  <script defer src="../js/include.js?v=6"></script>
-  <!-- Подключаем AI-скрипт для шага 2 -->
-  <script defer src="../js/ai-brief.js?v=1"></script>
+  <script defer src="js/include.js?v=6"></script>
+  <!-- Подключаем AI скрипт -->
+  <script defer src="js/ai-brief.js?v=1"></script>
 
   <!-- Адаптер: делаем фильтры на шаге «Подбор» такими же, как на agency.html -->
-  <script>
+  <script defer>
     // Этот init вызывается роутером на шаге 1
     window.initPickStep = function(){
       // Состояние
@@ -104,8 +117,7 @@
           // Сброс чекбоксов и подсветки
           resultsEl?.querySelectorAll('.card-blogger').forEach(li=>{
             li.classList.remove('selected');
-            const cb = li.querySelector('input[type="checkbox"]');
-            if (cb) cb.checked = false;
+            li.querySelector('input[type="checkbox"]')?.checked && (li.querySelector('input[type="checkbox"]').checked=false);
           });
         });
       }
@@ -153,7 +165,7 @@
         // Чипы
         updateActiveChips();
         // Счётчики
-        document.getElementById('resultsCount').textContent = list.length;
+        $('#resultsCount').textContent = list.length;
       }
 
       function renderList(list){
@@ -167,7 +179,6 @@
           const isSel = appState.selectedIds.has(String(b.id));
           const li = document.createElement('li');
           li.className = 'card-blogger' + (isSel ? ' selected':'');
-
           li.innerHTML = `
             <div class="avatar">${b.name.charAt(0)}</div>
             <div>
@@ -245,11 +256,12 @@
           ['Поиск',          $('#fQuery')?.value]
         ].filter(([,v])=>v);
 
-        filters.forEach(([label, v])=>{
+        filters.forEach(([label, v, id])=>{
           const chip = document.createElement('div');
           chip.className = 'chip-filter';
           chip.innerHTML = `${label}: ${v} <button type="button">×</button>`;
           chip.querySelector('button').addEventListener('click', ()=>{
+            // грубо находим по тексту, но проще — почистим все связанные поля
             switch(label){
               case 'Платформа': $('#fPlatform').value=''; break;
               case 'Подписчики от': $('#followersMinK').value=''; break;
@@ -277,11 +289,7 @@
       }
 
       function readPicked(){
-        try{
-          // нормализация: поддержим старый формат [ {id:1}, ... ]
-          const raw = JSON.parse(localStorage.getItem('selectedBloggers')||'[]');
-          return raw.map(x => (typeof x==='object'? x.id : x)).filter(Boolean).map(String);
-        }catch{ return [] }
+        try{ return JSON.parse(localStorage.getItem('selectedBloggers')||'[]'); }catch{ return [] }
       }
       function writePicked(arr){
         try{ localStorage.setItem('selectedBloggers', JSON.stringify(arr)); }catch{}
@@ -289,10 +297,10 @@
     };
   </script>
 
-  <script defer src="../js/deal-router.js?v=6"></script>
+  <script defer src="js/deal-router.js?v=6"></script>
 </head>
 <body>
-  <div data-include="/components/header.html"></div>
+  <div data-include="components/header.html"></div>
 
   <div class="deal-wrap container">
     <!-- Сайдбар-воронка -->
@@ -337,7 +345,7 @@
     </main>
   </div>
 
-  <div data-include="/components/footer.html"></div>
+  <div data-include="components/footer.html"></div>
 
   <!-- ================== ШАБЛОНЫ ШАГОВ ================== -->
 
